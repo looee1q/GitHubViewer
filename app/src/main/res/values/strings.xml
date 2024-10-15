@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">GitHubViewer</string>
+    <string name="sign_in">sign in</string>
+    <string name="personal_access_token">Personal access token</string>
+    <string name="invalid_token">invalid token</string>
+    <string name="empty_string" />
 </resources>
