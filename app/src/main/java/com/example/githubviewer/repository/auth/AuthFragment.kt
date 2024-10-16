@@ -7,10 +7,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.commit
+import androidx.fragment.app.replace
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.githubviewer.R
 import com.example.githubviewer.databinding.AuthFragmentBinding
+import com.example.githubviewer.repository.repositories.RepositoriesListFragment
 import com.example.githubviewer.repository.util.hideKeyboard
 import com.example.githubviewer.repository.util.setOnIMEActionDoneListener
 import kotlinx.coroutines.flow.launchIn
@@ -54,7 +57,12 @@ class AuthFragment : Fragment() {
                 is AuthScreenState.InvalidInput -> invalidInputScreenState()
                 AuthScreenState.Loading -> loadingScreenState()
                 AuthScreenState.Initial -> {}
-                AuthScreenState.Idle -> {}
+                AuthScreenState.Idle -> {
+                    parentFragmentManager.commit {
+                        setReorderingAllowed(true)
+                        replace<RepositoriesListFragment>(R.id.fragment_container_view)
+                    }
+                }
             }
         }.launchIn(lifecycleScope)
     }

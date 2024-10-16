@@ -4,4 +4,11 @@
     <string name="personal_access_token">Personal access token</string>
     <string name="invalid_token">invalid token</string>
     <string name="empty_string" />
+    <string name="repositories">Repositories</string>
+    <string name="empty">Empty</string>
+    <string name="no_repositories_at_the_moment">No repositories at the moment</string>
+    <string name="refresh">refresh</string>
+    <string name="retry">retry</string>
+    <string name="connection_error">Connection error</string>
+    <string name="check_your_internet_connection">Check your internet connection</string>
 </resources>

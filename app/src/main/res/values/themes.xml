@@ -3,7 +3,7 @@
     <style name="Theme.GitHubViewer" parent="Theme.MaterialComponents.DayNight.NoActionBar">
 
         <item name="android:colorBackground">@color/bg</item>
-        <item name="android:statusBarColor">@color/dark_black</item>
+        <item name="android:statusBarColor">@color/status_bar</item>
         <item name="colorControlActivated">@color/secondary</item>
         <item name="android:textColorHighlight">@color/secondary</item>
         <item name="colorPrimary">@color/secondary</item>
