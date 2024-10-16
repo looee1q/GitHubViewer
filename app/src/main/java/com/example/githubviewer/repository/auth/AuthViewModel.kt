@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.githubviewer.data.AppRepository
 import com.example.githubviewer.data.NetworkClient
+import com.example.githubviewer.data.model.mappers.RepositoryInfoMapper
 import com.example.githubviewer.data.model.mappers.UserInfoMapper
 import com.example.githubviewer.domain.model.UserAuthStatus
 import kotlinx.coroutines.Dispatchers
@@ -16,7 +17,8 @@ import kotlinx.coroutines.launch
 class AuthViewModel : ViewModel() {
     private val repository = AppRepository(
         networkClient = NetworkClient(),
-        userInfoMapper = UserInfoMapper()
+        userInfoMapper = UserInfoMapper(),
+        repositoryInfoMapper = RepositoryInfoMapper()
     )
 
 //    val token: MutableLiveData<String>
