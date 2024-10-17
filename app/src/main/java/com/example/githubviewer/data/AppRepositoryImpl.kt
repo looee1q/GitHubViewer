@@ -18,12 +18,13 @@ import javax.inject.Singleton
 @Singleton
 class AppRepositoryImpl @Inject constructor(
     private val apiService: GitHubApiService,
+    private val keyValueStorage: KeyValueStorage,
     private val connectivityManager: ConnectivityManager,
     private val userInfoMapper: Mapper<UserInfoDto, UserInfo>,
     private val repositoryInfoMapper: Mapper<RepositoryInfoDto, RepositoryInfo>,
 ) : AppRepository {
 
-    private var bearerToken: String = ""
+    private val bearerToken: String get() = keyValueStorage.getKey()
 
     override suspend fun getRepositories(): NetworkRequestResult<List<RepositoryInfo>> {
         if (!connectivityManager.isDeviceConnectedToNetwork()) {
@@ -39,18 +40,28 @@ class AppRepositoryImpl @Inject constructor(
                 .map { repositoryInfoMapper.map(it) }
             NetworkRequestResult.Success(userRepositories)
         } catch (e: Exception) {
-            Log.d("AppRepository", "$e с описанием: ${e.message.toString()}")
+            Log.d("AppRepositoryImpl", "$e с описанием: ${e.message.toString()}")
             NetworkRequestResult.Error(NetworkError.OtherError(e.message.toString()))
         }
     }
 
     override suspend fun singIn(token: String): UserAuthStatus {
-        bearerToken = TOKEN_PREFIX + token
+        val bearerToken = TOKEN_PREFIX + token
         return try {
             val userInfoDto = apiService.authenticateUser(bearerToken)
+            keyValueStorage.saveKey(token)
             UserAuthStatus.Authorized(userInfoMapper.map(userInfoDto))
         } catch (e: Exception) {
             UserAuthStatus.NotAuthorized(e.message.toString())
+        }
+    }
+
+    override suspend fun getUserAuthStatus(): UserAuthStatus {
+        Log.d("AppRepositoryImpl", "bearer token is $bearerToken")
+        return if (bearerToken.isNotEmpty()) {
+            singIn(bearerToken)
+        } else {
+            UserAuthStatus.NotAuthorized("")
         }
     }
 
