@@ -7,7 +7,9 @@ import androidx.fragment.app.replace
 import com.example.githubviewer.R
 import com.example.githubviewer.databinding.MainActivityBinding
 import com.example.githubviewer.repository.auth.AuthFragment
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: MainActivityBinding
@@ -21,6 +23,5 @@ class MainActivity : AppCompatActivity() {
             setReorderingAllowed(true)
             replace<AuthFragment>(R.id.fragment_container_view)
         }
-
     }
 }

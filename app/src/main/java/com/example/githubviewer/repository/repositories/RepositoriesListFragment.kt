@@ -14,9 +14,11 @@ import com.example.githubviewer.R
 import com.example.githubviewer.databinding.RepositoriesListFragmentBinding
 import com.example.githubviewer.repository.util.getColorFromFragment
 import com.example.githubviewer.repository.util.setDivider
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
+@AndroidEntryPoint
 class RepositoriesListFragment : Fragment() {
 
     private var _binding: RepositoriesListFragmentBinding? = null

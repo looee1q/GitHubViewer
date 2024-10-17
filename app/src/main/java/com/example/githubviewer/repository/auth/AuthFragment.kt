@@ -16,9 +16,11 @@ import com.example.githubviewer.databinding.AuthFragmentBinding
 import com.example.githubviewer.repository.repositories.RepositoriesListFragment
 import com.example.githubviewer.repository.util.hideKeyboard
 import com.example.githubviewer.repository.util.setOnIMEActionDoneListener
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
+@AndroidEntryPoint
 class AuthFragment : Fragment() {
 
     private var _binding: AuthFragmentBinding? = null
