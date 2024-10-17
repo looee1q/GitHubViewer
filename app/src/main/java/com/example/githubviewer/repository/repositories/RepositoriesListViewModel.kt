@@ -2,24 +2,21 @@ package com.example.githubviewer.repository.repositories
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.githubviewer.data.AppRepository
-import com.example.githubviewer.data.NetworkClient
-import com.example.githubviewer.data.model.mappers.RepositoryInfoMapper
-import com.example.githubviewer.data.model.mappers.UserInfoMapper
+import com.example.githubviewer.domain.AppRepository
 import com.example.githubviewer.domain.model.NetworkError
 import com.example.githubviewer.domain.model.NetworkRequestResult
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class RepositoriesListViewModel : ViewModel() {
-    private val repository = AppRepository(
-        networkClient = NetworkClient(),
-        userInfoMapper = UserInfoMapper(),
-        repositoryInfoMapper = RepositoryInfoMapper()
-    )
+@HiltViewModel
+class RepositoriesListViewModel @Inject constructor(
+    private val repository: AppRepository
+) : ViewModel() {
 
     private val _screenState = MutableStateFlow<RepositoriesListScreenState>(
         RepositoriesListScreenState.Initial
