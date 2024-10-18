@@ -58,7 +58,7 @@ class AuthFragment : Fragment() {
             when (authScreenState) {
                 is AuthScreenState.InvalidInput -> invalidInputScreenState()
                 AuthScreenState.Loading -> loadingScreenState()
-                AuthScreenState.Initial -> {}
+                AuthScreenState.Initial -> initialScreenState()
                 AuthScreenState.Idle -> {
                     parentFragmentManager.commit {
                         setReorderingAllowed(true)
@@ -78,6 +78,12 @@ class AuthFragment : Fragment() {
         binding.progressBarOnSignInButton.isVisible = true
         binding.textInputLayout.error = null
         binding.signInButton.text = getString(R.string.empty_string)
+    }
+
+    private fun initialScreenState() {
+        binding.progressBarOnSignInButton.isVisible = false
+        binding.textInputLayout.error = null
+        binding.signInButton.text = resources.getText(R.string.sign_in)
     }
 
     private fun invalidInputScreenState() {

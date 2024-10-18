@@ -13,4 +13,6 @@ interface AppRepository {
     //suspend fun getRepositoryReadme(ownerName: String, repositoryName: String, branchName: String): NetworkRequestResult<String>
 
     suspend fun singIn(token: String): UserAuthStatus
+
+    suspend fun getUserAuthStatus(): UserAuthStatus
 }
