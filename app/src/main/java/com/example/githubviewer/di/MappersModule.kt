@@ -1,11 +1,14 @@
 package com.example.githubviewer.di
 
+import com.example.githubviewer.data.model.RepoDetailsDto
 import com.example.githubviewer.data.model.RepoDto
 import com.example.githubviewer.data.model.UserInfoDto
 import com.example.githubviewer.data.model.mappers.Mapper
-import com.example.githubviewer.data.model.mappers.RepositoryInfoMapper
+import com.example.githubviewer.data.model.mappers.RepoDetailsMapper
+import com.example.githubviewer.data.model.mappers.RepoMapper
 import com.example.githubviewer.data.model.mappers.UserInfoMapper
 import com.example.githubviewer.domain.model.Repo
+import com.example.githubviewer.domain.model.RepoDetails
 import com.example.githubviewer.domain.model.UserInfo
 import dagger.Binds
 import dagger.Module
@@ -17,9 +20,14 @@ import dagger.hilt.components.SingletonComponent
 abstract class MyMappersModule {
 
     @Binds
-    abstract fun bindRepositoryInfoMapper(
-        impl: RepositoryInfoMapper
+    abstract fun bindRepoMapper(
+        impl: RepoMapper
     ): Mapper<RepoDto, Repo>
+
+    @Binds
+    abstract fun bindRepoDetailsMapper(
+        impl: RepoDetailsMapper
+    ): Mapper<RepoDetailsDto, RepoDetails>
 
     @Binds
     abstract fun bindUserInfoMapper(impl: UserInfoMapper): Mapper<UserInfoDto, UserInfo>

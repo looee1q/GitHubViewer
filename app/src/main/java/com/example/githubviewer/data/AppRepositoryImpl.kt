@@ -2,6 +2,7 @@ package com.example.githubviewer.data
 
 import android.net.ConnectivityManager
 import android.util.Log
+import com.example.githubviewer.data.model.RepoDetailsDto
 import com.example.githubviewer.data.model.RepoDto
 import com.example.githubviewer.data.model.UserInfoDto
 import com.example.githubviewer.data.model.mappers.Mapper
@@ -10,6 +11,7 @@ import com.example.githubviewer.domain.AppRepository
 import com.example.githubviewer.domain.model.NetworkError
 import com.example.githubviewer.domain.model.NetworkRequestResult
 import com.example.githubviewer.domain.model.Repo
+import com.example.githubviewer.domain.model.RepoDetails
 import com.example.githubviewer.domain.model.UserAuthStatus
 import com.example.githubviewer.domain.model.UserInfo
 import javax.inject.Inject
@@ -22,6 +24,7 @@ class AppRepositoryImpl @Inject constructor(
     private val connectivityManager: ConnectivityManager,
     private val userInfoMapper: Mapper<UserInfoDto, UserInfo>,
     private val repoMapper: Mapper<RepoDto, Repo>,
+    private val repoDetailsMapper: Mapper<RepoDetailsDto, RepoDetails>,
 ) : AppRepository {
 
     private val bearerToken: String get() = keyValueStorage.getKey()
@@ -39,6 +42,26 @@ class AppRepositoryImpl @Inject constructor(
                 )
                 .map { repoMapper.map(it) }
             NetworkRequestResult.Success(userRepositories)
+        } catch (e: Exception) {
+            Log.d("AppRepositoryImpl", "$e с описанием: ${e.message.toString()}")
+            NetworkRequestResult.Error(NetworkError.OtherError(e.message.toString()))
+        }
+    }
+
+    override suspend fun getRepository(repositoryName: String): NetworkRequestResult<RepoDetails> {
+        if (!connectivityManager.isDeviceConnectedToNetwork()) {
+            return NetworkRequestResult.Error(NetworkError.NoConnection)
+        }
+        return try {
+            val repositoryDetails = apiService
+                .getRepositoryDetails(
+                    personalAccessToken = bearerToken,
+                    repositoryOwner = "looee1q",
+                    repositoryName = repositoryName
+                ).run {
+                    repoDetailsMapper.map(this)
+                }
+            NetworkRequestResult.Success(repositoryDetails)
         } catch (e: Exception) {
             Log.d("AppRepositoryImpl", "$e с описанием: ${e.message.toString()}")
             NetworkRequestResult.Error(NetworkError.OtherError(e.message.toString()))

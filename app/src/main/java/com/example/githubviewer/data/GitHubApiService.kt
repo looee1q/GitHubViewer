@@ -1,5 +1,6 @@
 package com.example.githubviewer.data
 
+import com.example.githubviewer.data.model.RepoDetailsDto
 import com.example.githubviewer.data.model.RepoDto
 import com.example.githubviewer.data.model.UserInfoDto
 import retrofit2.http.GET
@@ -12,7 +13,7 @@ interface GitHubApiService {
     @GET("user")
     suspend fun authenticateUser(
         @Header("Authorization") personalAccessToken: String
-    ) : UserInfoDto
+    ): UserInfoDto
 
     @GET("users/{username}/repos")
     suspend fun getListRepositoriesForUser(
@@ -20,4 +21,11 @@ interface GitHubApiService {
         @Path("username") username: String,
         @Query("per_page") perPage: Int
     ): List<RepoDto>
+
+    @GET("repos/{owner}/{repo}")
+    suspend fun getRepositoryDetails(
+        @Header("Authorization") personalAccessToken: String,
+        @Path("owner") repositoryOwner: String,
+        @Path("repo") repositoryName: String,
+    ): RepoDetailsDto
 }
