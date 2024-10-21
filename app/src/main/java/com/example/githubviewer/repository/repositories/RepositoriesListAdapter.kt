@@ -4,13 +4,13 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.githubviewer.databinding.RepositoriesListItemBinding
-import com.example.githubviewer.domain.model.RepositoryInfo
+import com.example.githubviewer.domain.model.Repo
 
 class RepositoriesListAdapter(
-    private val onRepositoryClickListener: (RepositoryInfo) -> Unit
+    private val onRepositoryClickListener: (Repo) -> Unit
 ) : RecyclerView.Adapter<RepositoriesListItemViewHolder>() {
 
-    var repositoriesList: List<RepositoryInfo> = emptyList()
+    var repositoriesList: List<Repo> = emptyList()
         set(value) {
             field = value
             notifyDataSetChanged()
@@ -31,7 +31,7 @@ class RepositoriesListAdapter(
     }
 
     override fun onBindViewHolder(holder: RepositoriesListItemViewHolder, position: Int) {
-        holder.bind(repositoryInfo = repositoriesList[position])
+        holder.bind(repo = repositoriesList[position])
         holder.itemView.setOnClickListener {
             onRepositoryClickListener(repositoriesList[position])
         }

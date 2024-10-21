@@ -1,6 +1,6 @@
 package com.example.githubviewer.domain.model
 
-data class RepositoryInfo(
+data class Repo(
     val id: Long,
     val name: String,
     val description: String,

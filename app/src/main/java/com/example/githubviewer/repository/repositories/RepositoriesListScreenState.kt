@@ -1,6 +1,6 @@
 package com.example.githubviewer.repository.repositories
 
-import com.example.githubviewer.domain.model.RepositoryInfo
+import com.example.githubviewer.domain.model.Repo
 
 sealed interface RepositoriesListScreenState {
 
@@ -8,7 +8,7 @@ sealed interface RepositoriesListScreenState {
 
     data object Loading : RepositoriesListScreenState
 
-    data class Loaded(val repos: List<RepositoryInfo>) : RepositoriesListScreenState
+    data class Loaded(val repos: List<Repo>) : RepositoriesListScreenState
 
     data class ErrorOther(val error: String) : RepositoriesListScreenState
 

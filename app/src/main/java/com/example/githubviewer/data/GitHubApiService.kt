@@ -1,6 +1,6 @@
 package com.example.githubviewer.data
 
-import com.example.githubviewer.data.model.RepositoryInfoDto
+import com.example.githubviewer.data.model.RepoDto
 import com.example.githubviewer.data.model.UserInfoDto
 import retrofit2.http.GET
 import retrofit2.http.Header
@@ -19,5 +19,5 @@ interface GitHubApiService {
         @Header("Authorization") personalAccessToken: String,
         @Path("username") username: String,
         @Query("per_page") perPage: Int
-    ) : List<RepositoryInfoDto>
+    ): List<RepoDto>
 }

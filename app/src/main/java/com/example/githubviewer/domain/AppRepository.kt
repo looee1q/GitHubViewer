@@ -1,12 +1,12 @@
 package com.example.githubviewer.domain
 
 import com.example.githubviewer.domain.model.NetworkRequestResult
-import com.example.githubviewer.domain.model.RepositoryInfo
+import com.example.githubviewer.domain.model.Repo
 import com.example.githubviewer.domain.model.UserAuthStatus
 
 interface AppRepository {
 
-    suspend fun getRepositories(): NetworkRequestResult<List<RepositoryInfo>>
+    suspend fun getRepositories(): NetworkRequestResult<List<Repo>>
 
     //suspend fun getRepository(repoId: String): NetworkRequestResult<List<Repository>>
 

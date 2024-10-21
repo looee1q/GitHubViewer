@@ -2,14 +2,14 @@ package com.example.githubviewer.data
 
 import android.net.ConnectivityManager
 import android.util.Log
-import com.example.githubviewer.data.model.RepositoryInfoDto
+import com.example.githubviewer.data.model.RepoDto
 import com.example.githubviewer.data.model.UserInfoDto
 import com.example.githubviewer.data.model.mappers.Mapper
 import com.example.githubviewer.data.util.isDeviceConnectedToNetwork
 import com.example.githubviewer.domain.AppRepository
 import com.example.githubviewer.domain.model.NetworkError
 import com.example.githubviewer.domain.model.NetworkRequestResult
-import com.example.githubviewer.domain.model.RepositoryInfo
+import com.example.githubviewer.domain.model.Repo
 import com.example.githubviewer.domain.model.UserAuthStatus
 import com.example.githubviewer.domain.model.UserInfo
 import javax.inject.Inject
@@ -21,12 +21,12 @@ class AppRepositoryImpl @Inject constructor(
     private val keyValueStorage: KeyValueStorage,
     private val connectivityManager: ConnectivityManager,
     private val userInfoMapper: Mapper<UserInfoDto, UserInfo>,
-    private val repositoryInfoMapper: Mapper<RepositoryInfoDto, RepositoryInfo>,
+    private val repoMapper: Mapper<RepoDto, Repo>,
 ) : AppRepository {
 
     private val bearerToken: String get() = keyValueStorage.getKey()
 
-    override suspend fun getRepositories(): NetworkRequestResult<List<RepositoryInfo>> {
+    override suspend fun getRepositories(): NetworkRequestResult<List<Repo>> {
         if (!connectivityManager.isDeviceConnectedToNetwork()) {
             return NetworkRequestResult.Error(NetworkError.NoConnection)
         }
@@ -37,7 +37,7 @@ class AppRepositoryImpl @Inject constructor(
                     perPage = 10,
                     username = "looee1q"
                 )
-                .map { repositoryInfoMapper.map(it) }
+                .map { repoMapper.map(it) }
             NetworkRequestResult.Success(userRepositories)
         } catch (e: Exception) {
             Log.d("AppRepositoryImpl", "$e с описанием: ${e.message.toString()}")
