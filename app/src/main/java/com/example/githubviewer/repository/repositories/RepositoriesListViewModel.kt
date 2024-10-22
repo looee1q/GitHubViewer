@@ -3,7 +3,7 @@ package com.example.githubviewer.repository.repositories
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.githubviewer.domain.AppRepository
-import com.example.githubviewer.domain.model.NetworkError
+import com.example.githubviewer.domain.model.BaseNetworkError
 import com.example.githubviewer.domain.model.NetworkRequestResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -31,13 +31,13 @@ class RepositoriesListViewModel @Inject constructor(
         _screenState.value = RepositoriesListScreenState.Loading
         viewModelScope.launch(Dispatchers.IO) {
             when (val networkRequestResult = repository.getRepositories()) {
-                is NetworkRequestResult.Error<*> -> {
+                is NetworkRequestResult.Error<BaseNetworkError> -> {
                     when (networkRequestResult.error) {
-                        NetworkError.NoConnection -> {
+                        BaseNetworkError.NoConnection -> {
                             _screenState.value = RepositoriesListScreenState.ErrorNoConnection
                         }
 
-                        is NetworkError.OtherError -> {
+                        is BaseNetworkError.OtherError -> {
                             _screenState.value = RepositoriesListScreenState.ErrorOther(
                                 networkRequestResult.error.message
                             )

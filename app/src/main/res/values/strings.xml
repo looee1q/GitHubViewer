@@ -11,4 +11,20 @@
     <string name="retry">retry</string>
     <string name="connection_error">Connection error</string>
     <string name="check_your_internet_connection">Check your internet connection</string>
+    <string name="license">License</string>
+    <string name="no_readme">No README.md</string>
+    <string name="try_again_later">Try again later</string>
+    <string name="readme_is_empty">"README.cd is empty "</string>
+    <plurals name="star_plurals">
+        <item quantity="one">star</item>
+        <item quantity="other">stars</item>
+    </plurals>
+    <plurals name="fork_plurals">
+        <item quantity="one">fork</item>
+        <item quantity="other">forks</item>
+    </plurals>
+    <plurals name="watcher_plurals">
+        <item quantity="one">watcher</item>
+        <item quantity="other">watchers</item>
+    </plurals>
 </resources>

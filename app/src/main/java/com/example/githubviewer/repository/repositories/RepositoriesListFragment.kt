@@ -7,11 +7,14 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.commit
+import androidx.fragment.app.replace
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.githubviewer.R
 import com.example.githubviewer.databinding.RepositoriesListFragmentBinding
+import com.example.githubviewer.repository.repositorydetails.DetailInfoFragment
 import com.example.githubviewer.repository.util.getColorFromFragment
 import com.example.githubviewer.repository.util.setDivider
 import dagger.hilt.android.AndroidEntryPoint
@@ -29,6 +32,14 @@ class RepositoriesListFragment : Fragment() {
     private val repositoriesListAdapter by lazy {
         RepositoriesListAdapter {
             Log.d("RepositoriesListFragmen", "Вы нажали на репозиторий: $it")
+            parentFragmentManager.commit {
+                setReorderingAllowed(true)
+                addToBackStack(null)
+                replace<DetailInfoFragment>(
+                    containerViewId = R.id.fragment_container_view,
+                    args = DetailInfoFragment.createArgs(it.name)
+                )
+            }
         }
     }
 

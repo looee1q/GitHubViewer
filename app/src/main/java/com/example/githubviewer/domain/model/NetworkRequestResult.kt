@@ -1,15 +1,26 @@
 package com.example.githubviewer.domain.model
 
-sealed interface NetworkError {
+sealed interface NetworkError
 
-    data object NoConnection : NetworkError
+sealed interface BaseNetworkError : NetworkError {
 
-    data class OtherError(val message: String) : NetworkError
+    data object NoConnection : BaseNetworkError
+
+    data class OtherError(val message: String) : BaseNetworkError
 }
 
-sealed interface NetworkRequestResult<out D> {
+sealed interface ExtendedNetworkError : NetworkError {
 
-    data class Success<out D>(val data: D) : NetworkRequestResult<D>
+    data object NoConnection : ExtendedNetworkError
 
-    data class Error<out E : NetworkError>(val error: E) : NetworkRequestResult<Nothing>
+    data class OtherError(val message: String) : ExtendedNetworkError
+
+    data object ResourceNotFoundError : ExtendedNetworkError
+}
+
+sealed interface NetworkRequestResult<out D, out E : NetworkError> {
+
+    data class Success<out D>(val data: D) : NetworkRequestResult<D, Nothing>
+
+    data class Error<out E : NetworkError>(val error: E) : NetworkRequestResult<Nothing, E>
 }
