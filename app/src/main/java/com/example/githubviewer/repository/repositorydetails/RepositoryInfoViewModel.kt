@@ -4,7 +4,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.githubviewer.domain.AppRepository
-import com.example.githubviewer.domain.model.NetworkError
+import com.example.githubviewer.domain.model.BaseNetworkError
+import com.example.githubviewer.domain.model.ExtendedNetworkError
 import com.example.githubviewer.domain.model.NetworkRequestResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -28,20 +29,23 @@ class RepositoryInfoViewModel @Inject constructor(
     private val repositoryName = savedStateHandle.get<String>(REPOSITORY_NAME).orEmpty()
 
     init {
-        getRepository()
+        viewModelScope.launch {
+            getRepository()
+            getReadme()
+        }
     }
 
-    private fun getRepository() {
+    private suspend fun getRepository() {
         _screenState.value = DetailInfoScreenState.Loading
         viewModelScope.launch(Dispatchers.IO) {
             when (val networkRequestResult = repository.getRepository(repositoryName)) {
-                is NetworkRequestResult.Error<*> -> {
+                is NetworkRequestResult.Error<BaseNetworkError> -> {
                     when (networkRequestResult.error) {
-                        NetworkError.NoConnection -> {
+                        BaseNetworkError.NoConnection -> {
                             _screenState.value = DetailInfoScreenState.ErrorNoConnection
                         }
 
-                        is NetworkError.OtherError -> {
+                        is BaseNetworkError.OtherError -> {
                             _screenState.value = DetailInfoScreenState.ErrorOther(
                                 error = networkRequestResult.error.message
                             )
@@ -51,8 +55,55 @@ class RepositoryInfoViewModel @Inject constructor(
 
                 is NetworkRequestResult.Success -> {
                     _screenState.value = DetailInfoScreenState.Loaded(
-                        repoDetails = networkRequestResult.data
+                        repoDetails = networkRequestResult.data,
+                        readmeState = ReadmeState.Initial
                     )
+                }
+            }
+        }.join()
+    }
+
+    private fun getReadme() {
+        val currentScreenState = screenState.value
+        if (currentScreenState is DetailInfoScreenState.Loaded) {
+            _screenState.value = currentScreenState.copy(readmeState = ReadmeState.Loading)
+            viewModelScope.launch(Dispatchers.IO) {
+                when (val networkRequestResult = repository.getRepositoryReadme(repositoryName)) {
+                    is NetworkRequestResult.Error<ExtendedNetworkError> -> {
+                        when (networkRequestResult.error) {
+                            ExtendedNetworkError.NoConnection -> {
+                                _screenState.value = currentScreenState.copy(
+                                    readmeState = ReadmeState.ErrorNoConnection
+                                )
+                            }
+
+                            is ExtendedNetworkError.OtherError -> {
+                                _screenState.value = currentScreenState.copy(
+                                    readmeState = ReadmeState.ErrorOther(
+                                        error = networkRequestResult.error.message
+                                    )
+                                )
+                            }
+
+                            ExtendedNetworkError.ResourceNotFoundError -> {
+                                _screenState.value = currentScreenState.copy(
+                                    readmeState = ReadmeState.NotExists
+                                )
+                            }
+                        }
+                    }
+
+                    is NetworkRequestResult.Success -> {
+                        if (networkRequestResult.data.content.isEmpty()) {
+                            _screenState.value = currentScreenState.copy(
+                                readmeState = ReadmeState.Empty
+                            )
+                        } else {
+                            _screenState.value = currentScreenState.copy(
+                                readmeState = ReadmeState.Loaded(networkRequestResult.data.content)
+                            )
+                        }
+                    }
                 }
             }
         }

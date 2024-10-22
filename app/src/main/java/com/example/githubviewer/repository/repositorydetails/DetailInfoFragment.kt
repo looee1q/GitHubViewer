@@ -11,8 +11,8 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.githubviewer.R
 import com.example.githubviewer.databinding.DetailInfoFragmentBinding
-import com.example.githubviewer.repository.util.getColorFromFragment
 import dagger.hilt.android.AndroidEntryPoint
+import io.noties.markwon.Markwon
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
@@ -23,6 +23,10 @@ class DetailInfoFragment : Fragment() {
     private val binding: DetailInfoFragmentBinding get() = _binding!!
 
     private val viewModel by viewModels<RepositoryInfoViewModel>()
+
+    private val markwon: Markwon by lazy {
+        Markwon.create(requireContext())
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -69,14 +73,21 @@ class DetailInfoFragment : Fragment() {
     private fun render(detailInfoScreenState: DetailInfoScreenState) {
         when (detailInfoScreenState) {
             DetailInfoScreenState.Initial -> {}
-            DetailInfoScreenState.Loading -> showLoading()
-            is DetailInfoScreenState.Loaded -> showContent(detailInfoScreenState)
-            DetailInfoScreenState.ErrorNoConnection -> showNotionAboutConnectionError()
-            is DetailInfoScreenState.ErrorOther -> showNotionAboutError()
+            DetailInfoScreenState.Loading -> showLoadingState()
+            is DetailInfoScreenState.Loaded -> showLoadedState(detailInfoScreenState)
+            DetailInfoScreenState.ErrorNoConnection -> showNoConnectionState()
+            is DetailInfoScreenState.ErrorOther -> showOtherErrorState(detailInfoScreenState)
         }
     }
 
-    private fun showContent(detailInfoScreenState: DetailInfoScreenState.Loaded) {
+    private fun showLoadingState() {
+        binding.contentScrollView.isVisible = false
+        binding.repositoryProgressBar.isVisible = true
+        binding.repositoryErrorNotificationContainer.root.isVisible = false
+        binding.retryButton.isVisible = false
+    }
+
+    private fun showLoadedState(detailInfoScreenState: DetailInfoScreenState.Loaded) {
         val repoDetails = detailInfoScreenState.repoDetails
         binding.contentScrollView.isVisible = true
         binding.linkText.text = repoDetails.url
@@ -101,16 +112,12 @@ class DetailInfoFragment : Fragment() {
         binding.repositoryProgressBar.isVisible = false
         binding.repositoryErrorNotificationContainer.root.isVisible = false
         binding.retryButton.isVisible = false
+
+        val readmeState = detailInfoScreenState.readmeState
+        renderReadmeState(readmeState)
     }
 
-    private fun showLoading() {
-        binding.contentScrollView.isVisible = false
-        binding.repositoryProgressBar.isVisible = true
-        binding.repositoryErrorNotificationContainer.root.isVisible = false
-        binding.retryButton.isVisible = false
-    }
-
-    private fun showNotionAboutConnectionError() {
+    private fun showNoConnectionState() {
         binding.contentScrollView.isVisible = false
         binding.repositoryProgressBar.isVisible = false
         binding.repositoryErrorNotificationContainer.root.isVisible = true
@@ -118,21 +125,81 @@ class DetailInfoFragment : Fragment() {
         with(binding.repositoryErrorNotificationContainer) {
             errorImage.setImageResource(R.drawable.ic_no_connection)
             errorMainDescription.text = getString(R.string.connection_error)
-            errorMainDescription.setTextColor(getColorFromFragment(R.color.red))
             errorAuxiliaryDescription.text = getString(R.string.check_your_internet_connection)
         }
     }
 
-    private fun showNotionAboutError() {
+    private fun showOtherErrorState(detailInfoScreenState: DetailInfoScreenState.ErrorOther) {
         binding.contentScrollView.isVisible = false
         binding.repositoryProgressBar.isVisible = false
         binding.repositoryErrorNotificationContainer.root.isVisible = true
         binding.retryButton.isVisible = true
         with(binding.repositoryErrorNotificationContainer) {
             errorImage.setImageResource(R.drawable.ic_something_error)
-            errorMainDescription.text = "Something error"
-            errorMainDescription.setTextColor(getColorFromFragment(R.color.red))
-            errorAuxiliaryDescription.text = "Check your something"
+            errorMainDescription.text = detailInfoScreenState.error
+            errorAuxiliaryDescription.text = getString(R.string.try_again_later)
+        }
+    }
+
+    private fun renderReadmeState(readmeState: ReadmeState) {
+        when (readmeState) {
+            ReadmeState.Initial -> {}
+            ReadmeState.Loading -> showReadmeLoadingState()
+            is ReadmeState.Loaded -> showReadmeLoadedState(readmeState)
+            ReadmeState.Empty -> showReadmeEmptyState()
+            ReadmeState.NotExists -> showReadmeNotExistsState()
+            ReadmeState.ErrorNoConnection -> showReadmeNoConnectionState()
+            is ReadmeState.ErrorOther -> showReadmeOtherErrorState(readmeState)
+        }
+    }
+
+    private fun showReadmeLoadingState() {
+        binding.readmeContent.isVisible = false
+        binding.readmeProgressBar.isVisible = true
+        binding.readmeErrorNotificationContainer.root.isVisible = false
+    }
+
+    private fun showReadmeLoadedState(readmeState: ReadmeState.Loaded) {
+        binding.readmeContent.isVisible = true
+        binding.readmeProgressBar.isVisible = false
+        binding.readmeErrorNotificationContainer.root.isVisible = false
+        markwon.setMarkdown(binding.readmeContent, readmeState.markdown)
+    }
+
+    private fun showReadmeEmptyState() {
+        binding.readmeContent.isVisible = true
+        binding.readmeProgressBar.isVisible = false
+        binding.readmeErrorNotificationContainer.root.isVisible = false
+        markwon.setMarkdown(binding.readmeContent, getString(R.string.readme_is_empty))
+    }
+
+    private fun showReadmeNotExistsState() {
+        binding.readmeContent.isVisible = true
+        binding.readmeProgressBar.isVisible = false
+        binding.readmeErrorNotificationContainer.root.isVisible = false
+        markwon.setMarkdown(binding.readmeContent, getString(R.string.no_readme))
+    }
+
+    private fun showReadmeNoConnectionState() {
+        binding.readmeContent.isVisible = false
+        binding.readmeProgressBar.isVisible = false
+        binding.readmeErrorNotificationContainer.root.isVisible = true
+        with(binding.readmeErrorNotificationContainer) {
+            errorImage.setImageResource(R.drawable.ic_no_connection)
+            errorMainDescription.text = getString(R.string.connection_error)
+            errorAuxiliaryDescription.text =
+                getString(R.string.check_your_internet_connection)
+        }
+    }
+
+    private fun showReadmeOtherErrorState(readmeState: ReadmeState.ErrorOther) {
+        binding.readmeContent.isVisible = false
+        binding.readmeProgressBar.isVisible = false
+        binding.readmeErrorNotificationContainer.root.isVisible = true
+        with(binding.readmeErrorNotificationContainer) {
+            errorImage.setImageResource(R.drawable.ic_something_error)
+            errorMainDescription.text = readmeState.error
+            errorAuxiliaryDescription.text = getString(R.string.try_again_later)
         }
     }
 

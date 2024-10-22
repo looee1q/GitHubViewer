@@ -8,7 +8,10 @@ sealed interface DetailInfoScreenState {
 
     data object Loading : DetailInfoScreenState
 
-    data class Loaded(val repoDetails: RepoDetails) : DetailInfoScreenState
+    data class Loaded(
+        val repoDetails: RepoDetails,
+        val readmeState: ReadmeState
+    ) : DetailInfoScreenState
 
     data class ErrorOther(val error: String) : DetailInfoScreenState
 
