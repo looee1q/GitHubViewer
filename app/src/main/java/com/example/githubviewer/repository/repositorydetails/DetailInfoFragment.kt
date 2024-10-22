@@ -9,6 +9,8 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.navOptions
 import com.example.githubviewer.R
 import com.example.githubviewer.databinding.DetailInfoFragmentBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -45,11 +47,21 @@ class DetailInfoFragment : Fragment() {
         )
 
         binding.navigationBackButton.setOnClickListener {
-            parentFragmentManager.popBackStack()
+            findNavController().navigateUp()
         }
 
         binding.leaveProfileButton.setOnClickListener {
-            //
+            val navOptions = navOptions {
+                popUpTo(
+                    id = R.id.detailInfoFragment,
+                    popUpToBuilder = { inclusive = true }
+                )
+            }
+            findNavController().navigate(
+                resId = R.id.action_detailInfoFragment_to_authFragment,
+                args = null,
+                navOptions = navOptions
+            )
         }
 
         binding.linkText.setOnClickListener {
@@ -184,6 +196,7 @@ class DetailInfoFragment : Fragment() {
         binding.readmeContent.isVisible = false
         binding.readmeProgressBar.isVisible = false
         binding.readmeErrorNotificationContainer.root.isVisible = true
+        binding.retryButton.isVisible = true
         with(binding.readmeErrorNotificationContainer) {
             errorImage.setImageResource(R.drawable.ic_no_connection)
             errorMainDescription.text = getString(R.string.connection_error)
@@ -196,6 +209,7 @@ class DetailInfoFragment : Fragment() {
         binding.readmeContent.isVisible = false
         binding.readmeProgressBar.isVisible = false
         binding.readmeErrorNotificationContainer.root.isVisible = true
+        binding.retryButton.isVisible = true
         with(binding.readmeErrorNotificationContainer) {
             errorImage.setImageResource(R.drawable.ic_something_error)
             errorMainDescription.text = readmeState.error

@@ -7,10 +7,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.commit
-import androidx.fragment.app.replace
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.navOptions
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.githubviewer.R
 import com.example.githubviewer.databinding.RepositoriesListFragmentBinding
@@ -31,15 +31,10 @@ class RepositoriesListFragment : Fragment() {
 
     private val repositoriesListAdapter by lazy {
         RepositoriesListAdapter {
-            Log.d("RepositoriesListFragmen", "Вы нажали на репозиторий: $it")
-            parentFragmentManager.commit {
-                setReorderingAllowed(true)
-                addToBackStack(null)
-                replace<DetailInfoFragment>(
-                    containerViewId = R.id.fragment_container_view,
-                    args = DetailInfoFragment.createArgs(it.name)
-                )
-            }
+            findNavController().navigate(
+                resId = R.id.action_repositoriesListFragment_to_detailInfoFragment,
+                args = DetailInfoFragment.createArgs(it.name)
+            )
         }
     }
 
@@ -58,7 +53,10 @@ class RepositoriesListFragment : Fragment() {
         viewModel.screenState.onEach { repositoriesListScreenState ->
             when (repositoriesListScreenState) {
 
-                RepositoriesListScreenState.Initial -> Log.d("RepositoriesListFragmen", "Состояние репозитория: Initial")
+                RepositoriesListScreenState.Initial -> Log.d(
+                    "RepositoriesListFragmen",
+                    "Состояние репозитория: Initial"
+                )
 
                 RepositoriesListScreenState.Loading -> {
                     Log.d("RepositoriesListFragmen", "Состояние репозитория: Loading")
@@ -92,6 +90,20 @@ class RepositoriesListFragment : Fragment() {
             requireContext(), LinearLayoutManager.VERTICAL, false
         )
         binding.repositoriesRecyclerView.setDivider(R.drawable.line_divider)
+
+        binding.leaveProfileButton.setOnClickListener {
+            val navOptions = navOptions {
+                popUpTo(
+                    id = R.id.repositoriesListFragment,
+                    popUpToBuilder = { inclusive = true }
+                )
+            }
+            findNavController().navigate(
+                resId = R.id.action_repositoriesListFragment_to_authFragment,
+                args = null,
+                navOptions = navOptions
+            )
+        }
     }
 
     override fun onDestroyView() {
