@@ -35,6 +35,10 @@ class RepositoryInfoViewModel @Inject constructor(
         }
     }
 
+    fun onLogoutButtonPressed() {
+        deleteUserAuthToken()
+    }
+
     private suspend fun getRepository() {
         _screenState.value = DetailInfoScreenState.Loading
         viewModelScope.launch(Dispatchers.IO) {
@@ -107,6 +111,10 @@ class RepositoryInfoViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    private fun deleteUserAuthToken() {
+        repository.deleteUserAuthToken()
     }
 
     companion object {

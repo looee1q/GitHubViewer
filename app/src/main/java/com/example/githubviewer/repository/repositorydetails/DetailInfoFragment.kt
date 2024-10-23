@@ -50,7 +50,8 @@ class DetailInfoFragment : Fragment() {
             findNavController().navigateUp()
         }
 
-        binding.leaveProfileButton.setOnClickListener {
+        binding.logoutButton.setOnClickListener {
+            viewModel.onLogoutButtonPressed()
             val navOptions = navOptions {
                 popUpTo(
                     id = R.id.repositoriesListFragment,

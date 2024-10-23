@@ -41,12 +41,12 @@
             tools:text="moko-resources moko-resources" />
 
         <ImageView
-            android:id="@+id/leave_profile_button"
+            android:id="@+id/logout_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_marginEnd="16dp"
-            android:src="@drawable/ic_leave" />
+            android:src="@drawable/ic_logout" />
 
     </LinearLayout>
 

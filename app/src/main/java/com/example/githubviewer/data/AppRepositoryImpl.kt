@@ -130,6 +130,10 @@ class AppRepositoryImpl @Inject constructor(
         }
     }
 
+    override fun deleteUserAuthToken() {
+        keyValueStorage.removeKey()
+    }
+
     companion object {
         private const val TOKEN_PREFIX = "Bearer "
     }

@@ -91,7 +91,8 @@ class RepositoriesListFragment : Fragment() {
         )
         binding.repositoriesRecyclerView.setDivider(R.drawable.line_divider)
 
-        binding.leaveProfileButton.setOnClickListener {
+        binding.logoutButton.setOnClickListener {
+            viewModel.onLogoutButtonPressed()
             val navOptions = navOptions {
                 popUpTo(
                     id = R.id.repositoriesListFragment,

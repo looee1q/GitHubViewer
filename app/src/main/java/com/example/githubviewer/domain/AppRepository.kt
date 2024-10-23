@@ -23,4 +23,6 @@ interface AppRepository {
     suspend fun singIn(token: String): UserAuthStatus
 
     suspend fun getUserAuthStatus(): UserAuthStatus
+
+    fun deleteUserAuthToken()
 }

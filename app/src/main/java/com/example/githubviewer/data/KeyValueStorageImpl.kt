@@ -16,7 +16,7 @@ class KeyValueStorageImpl @Inject constructor(
     }
 
     override fun removeKey() {
-        sharedPreferences.edit().remove(STORAGE_KEY_OF_USER_KEY).apply()
+        return sharedPreferences.edit().remove(STORAGE_KEY_OF_USER_KEY).apply()
     }
 
     companion object {
