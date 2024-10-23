@@ -1,6 +1,5 @@
 package com.example.githubviewer.repository.auth
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.githubviewer.domain.AppRepository
@@ -26,47 +25,13 @@ class AuthViewModel @Inject constructor(
     private val _screenState = MutableStateFlow<AuthScreenState>(AuthScreenState.Initial)
     val screenState: StateFlow<AuthScreenState> = _screenState.asStateFlow()
 
-    init {
-        _screenState.value = AuthScreenState.Loading
-        viewModelScope.launch(Dispatchers.IO) {
-            when (val userAuthStatus = repository.getUserAuthStatus()) {
-                is UserAuthStatus.Authorized -> {
-                    Log.d(
-                        "AuthViewModel",
-                        "Авторизация прошла успешно. Пользователь: ${userAuthStatus.userInfo}"
-                    )
-                    _screenState.value = AuthScreenState.Idle
-                }
-
-                is UserAuthStatus.NotAuthorized -> {
-                    Log.d(
-                        "AuthViewModel",
-                        "Авторизация не удалась по причине: ${userAuthStatus.message}"
-                    )
-                    _screenState.value = AuthScreenState.Initial
-                }
-            }
-        }
-    }
-
     fun onSignButtonPressed(inputToken: String) {
         if (inputToken.isNotBlank()) {
             _screenState.value = AuthScreenState.Loading
             viewModelScope.launch(Dispatchers.IO) {
                 when (val userAuthStatus = repository.singIn(inputToken)) {
-                    is UserAuthStatus.Authorized -> {
-                        Log.d(
-                            "AuthViewModel",
-                            "Авторизация прошла успешно. Пользователь: ${userAuthStatus.userInfo}"
-                        )
-                        _screenState.value = AuthScreenState.Idle
-                    }
-
+                    is UserAuthStatus.Authorized -> _screenState.value = AuthScreenState.Idle
                     is UserAuthStatus.NotAuthorized -> {
-                        Log.d(
-                            "AuthViewModel",
-                            "Авторизация не удалась по причине: ${userAuthStatus.message}"
-                        )
                         _screenState.value = AuthScreenState.InvalidInput(userAuthStatus.message)
                     }
                 }
