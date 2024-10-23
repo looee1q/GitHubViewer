@@ -80,7 +80,7 @@ class RepositoriesListFragment : Fragment() {
 
                 is RepositoriesListScreenState.ErrorOther -> {
                     Log.d("RepositoriesListFragmen", "Состояние репозитория: ErrorOther")
-                    showNotionAboutError()
+                    showNotionAboutError(repositoriesListScreenState)
                 }
             }
         }.launchIn(lifecycleScope)
@@ -115,7 +115,7 @@ class RepositoriesListFragment : Fragment() {
     private fun showContent(repositoriesListScreenState: RepositoriesListScreenState.Loaded) {
         binding.repositoriesRecyclerView.isVisible = true
         binding.progressBar.isVisible = false
-        binding.errorNotificationContainer.isVisible = false
+        binding.errorNotificationContainer.root.isVisible = false
         binding.retryButton.isVisible = false
         repositoriesListAdapter.repositoriesList = repositoriesListScreenState.repos
     }
@@ -123,44 +123,51 @@ class RepositoriesListFragment : Fragment() {
     private fun showLoading() {
         binding.repositoriesRecyclerView.isVisible = false
         binding.progressBar.isVisible = true
-        binding.errorNotificationContainer.isVisible = false
+        binding.errorNotificationContainer.root.isVisible = false
         binding.retryButton.isVisible = false
     }
 
     private fun showNotionAboutEmptyRepositoriesList() {
         binding.repositoriesRecyclerView.isVisible = false
         binding.progressBar.isVisible = false
-        binding.errorNotificationContainer.isVisible = true
+        binding.errorNotificationContainer.root.isVisible = true
         binding.retryButton.isVisible = true
-        binding.errorImage.setImageResource(R.drawable.ic_empty_list)
-        binding.errorMainDescription.text = getString(R.string.empty)
-        binding.errorMainDescription.setTextColor(getColorFromFragment(R.color.secondary))
-        binding.errorAuxiliaryDescription.text = getString(R.string.no_repositories_at_the_moment)
+        with(binding.errorNotificationContainer) {
+            errorImage.setImageResource(R.drawable.ic_empty_list)
+            errorMainDescription.text = getString(R.string.empty)
+            errorMainDescription.setTextColor(getColorFromFragment(R.color.secondary))
+            errorAuxiliaryDescription.text = getString(R.string.no_repositories_at_the_moment)
+        }
         binding.retryButton.text = getString(R.string.refresh)
     }
 
     private fun showNotionAboutConnectionError() {
         binding.repositoriesRecyclerView.isVisible = false
         binding.progressBar.isVisible = false
-        binding.errorNotificationContainer.isVisible = true
+        binding.errorNotificationContainer.root.isVisible = true
         binding.retryButton.isVisible = true
-        binding.errorImage.setImageResource(R.drawable.ic_no_connection)
-        binding.errorMainDescription.text = getString(R.string.connection_error)
-        binding.errorMainDescription.setTextColor(getColorFromFragment(R.color.red))
-        binding.errorAuxiliaryDescription.text = getString(R.string.check_your_internet_connection)
+        with(binding.errorNotificationContainer) {
+            errorImage.setImageResource(R.drawable.ic_no_connection)
+            errorMainDescription.text = getString(R.string.connection_error)
+            errorMainDescription.setTextColor(getColorFromFragment(R.color.red))
+            errorAuxiliaryDescription.text = getString(R.string.check_your_internet_connection)
+        }
         binding.retryButton.text = getString(R.string.retry)
     }
 
-    private fun showNotionAboutError() {
+    private fun showNotionAboutError(
+        repositoriesListScreenState: RepositoriesListScreenState.ErrorOther
+    ) {
         binding.repositoriesRecyclerView.isVisible = false
         binding.progressBar.isVisible = false
-        binding.errorNotificationContainer.isVisible = true
+        binding.errorNotificationContainer.root.isVisible = true
         binding.retryButton.isVisible = true
-        binding.errorImage.setImageResource(R.drawable.ic_something_error)
-        binding.errorMainDescription.text = "Something error"
-        binding.errorMainDescription.setTextColor(getColorFromFragment(R.color.red))
-        binding.errorAuxiliaryDescription.text = "Check your something"
+        with(binding.errorNotificationContainer) {
+            errorImage.setImageResource(R.drawable.ic_something_error)
+            errorMainDescription.text = repositoriesListScreenState.error
+            errorMainDescription.setTextColor(getColorFromFragment(R.color.red))
+            errorAuxiliaryDescription.text = getString(R.string.try_again_later)
+        }
         binding.retryButton.text = getString(R.string.retry)
     }
-
 }
