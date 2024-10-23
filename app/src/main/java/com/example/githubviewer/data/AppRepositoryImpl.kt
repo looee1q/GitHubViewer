@@ -110,23 +110,25 @@ class AppRepositoryImpl @Inject constructor(
     }
 
     override suspend fun singIn(token: String): UserAuthStatus {
+        if (!connectivityManager.isDeviceConnectedToNetwork()) {
+            return UserAuthStatus.NotAuthorized(BaseNetworkError.NoConnection)
+        }
         val bearerToken = TOKEN_PREFIX + token
         return try {
             val userInfoDto = apiService.authenticateUser(bearerToken)
             keyValueStorage.saveKey(bearerToken)
             UserAuthStatus.Authorized(userInfoMapper.map(userInfoDto))
         } catch (e: Exception) {
-            UserAuthStatus.NotAuthorized(e.message.toString())
+            UserAuthStatus.NotAuthorized(BaseNetworkError.OtherError(e.message.toString()))
         }
     }
 
     override suspend fun getUserAuthStatus(): UserAuthStatus {
-        Log.d("AppRepositoryImpl", "bearer token is $bearerToken")
         return if (bearerToken.isNotEmpty()) {
             val token = bearerToken.removePrefix(TOKEN_PREFIX)
             singIn(token)
         } else {
-            UserAuthStatus.NotAuthorized("")
+            UserAuthStatus.NotAuthorized(BaseNetworkError.OtherError(""))
         }
     }
 

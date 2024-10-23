@@ -3,6 +3,7 @@ package com.example.githubviewer.repository.auth
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.githubviewer.domain.AppRepository
+import com.example.githubviewer.domain.model.BaseNetworkError
 import com.example.githubviewer.domain.model.UserAuthStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -17,11 +18,6 @@ class AuthViewModel @Inject constructor(
     private val repository: AppRepository
 ) : ViewModel() {
 
-//    val token: MutableLiveData<String>
-//    val state: LiveData<State>
-//    val actions: Flow<Action>
-
-    private val token = MutableStateFlow("")
     private val _screenState = MutableStateFlow<AuthScreenState>(AuthScreenState.Initial)
     val screenState: StateFlow<AuthScreenState> = _screenState.asStateFlow()
 
@@ -32,7 +28,17 @@ class AuthViewModel @Inject constructor(
                 when (val userAuthStatus = repository.singIn(inputToken)) {
                     is UserAuthStatus.Authorized -> _screenState.value = AuthScreenState.Idle
                     is UserAuthStatus.NotAuthorized -> {
-                        _screenState.value = AuthScreenState.InvalidInput(userAuthStatus.message)
+                        when (userAuthStatus.baseNetworkError) {
+                            BaseNetworkError.NoConnection -> {
+                                _screenState.value = AuthScreenState.NoConnection
+                            }
+
+                            is BaseNetworkError.OtherError -> {
+                                _screenState.value = AuthScreenState.InvalidInput(
+                                    userAuthStatus.baseNetworkError.message
+                                )
+                            }
+                        }
                     }
                 }
             }

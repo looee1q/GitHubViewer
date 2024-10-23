@@ -83,4 +83,12 @@
             app:trackThickness="3dp" />
     </FrameLayout>
 
+    <include
+        android:id="@+id/error_notification_container"
+        layout="@layout/error_notification_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@id/button_and_progress_bar_container"
+        app:layout_constraintTop_toBottomOf="@id/logo_icon" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -8,5 +8,7 @@ sealed interface AuthScreenState {
 
     data object Loading : AuthScreenState
 
+    data object NoConnection : AuthScreenState
+
     data class InvalidInput(val reason: String) : AuthScreenState
 }

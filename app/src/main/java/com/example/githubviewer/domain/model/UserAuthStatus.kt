@@ -4,5 +4,5 @@ sealed interface UserAuthStatus {
 
     data class Authorized(val userInfo: UserInfo) : UserAuthStatus
 
-    data class NotAuthorized(val message: String) : UserAuthStatus
+    data class NotAuthorized(val baseNetworkError: BaseNetworkError) : UserAuthStatus
 }

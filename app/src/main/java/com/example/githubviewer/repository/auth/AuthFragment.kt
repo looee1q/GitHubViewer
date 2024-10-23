@@ -12,6 +12,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
 import com.example.githubviewer.R
 import com.example.githubviewer.databinding.AuthFragmentBinding
+import com.example.githubviewer.repository.util.getColorFromFragment
 import com.example.githubviewer.repository.util.hideKeyboard
 import com.example.githubviewer.repository.util.setOnIMEActionDoneListener
 import dagger.hilt.android.AndroidEntryPoint
@@ -52,9 +53,10 @@ class AuthFragment : Fragment() {
 
         viewModel.screenState.onEach { authScreenState ->
             when (authScreenState) {
-                is AuthScreenState.InvalidInput -> invalidInputScreenState()
-                AuthScreenState.Loading -> loadingScreenState()
                 AuthScreenState.Initial -> initialScreenState()
+                AuthScreenState.Loading -> loadingScreenState()
+                is AuthScreenState.InvalidInput -> invalidInputScreenState()
+                AuthScreenState.NoConnection -> noConnectionState()
                 AuthScreenState.Idle -> {
                     val navOptions = navOptions {
                         popUpTo(
@@ -78,20 +80,39 @@ class AuthFragment : Fragment() {
     }
 
     private fun loadingScreenState() {
+        binding.errorNotificationContainer.root.isVisible = false
         binding.progressBarOnSignInButton.isVisible = true
+        binding.textInputLayout.isVisible = true
         binding.textInputLayout.error = null
         binding.signInButton.text = getString(R.string.empty_string)
     }
 
     private fun initialScreenState() {
+        binding.errorNotificationContainer.root.isVisible = false
         binding.progressBarOnSignInButton.isVisible = false
+        binding.textInputLayout.isVisible = true
         binding.textInputLayout.error = null
-        binding.signInButton.text = resources.getText(R.string.sign_in)
+        binding.signInButton.text = getText(R.string.sign_in)
     }
 
     private fun invalidInputScreenState() {
+        binding.errorNotificationContainer.root.isVisible = false
         binding.progressBarOnSignInButton.isVisible = false
+        binding.textInputLayout.isVisible = true
         binding.textInputLayout.error = getString(R.string.invalid_token)
-        binding.signInButton.text = resources.getText(R.string.sign_in)
+        binding.signInButton.text = getText(R.string.sign_in)
+    }
+
+    private fun noConnectionState() {
+        binding.errorNotificationContainer.root.isVisible = true
+        binding.progressBarOnSignInButton.isVisible = false
+        binding.textInputLayout.isVisible = false
+        binding.signInButton.text = getText(R.string.retry)
+        with(binding.errorNotificationContainer) {
+            errorImage.setImageResource(R.drawable.ic_no_connection)
+            errorMainDescription.text = getString(R.string.connection_error)
+            errorMainDescription.setTextColor(getColorFromFragment(R.color.red))
+            errorAuxiliaryDescription.text = getString(R.string.check_your_internet_connection)
+        }
     }
 }
