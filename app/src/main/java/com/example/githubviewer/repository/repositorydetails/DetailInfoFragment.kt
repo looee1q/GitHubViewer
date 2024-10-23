@@ -6,13 +6,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
 import com.example.githubviewer.R
 import com.example.githubviewer.databinding.DetailInfoFragmentBinding
+import com.example.githubviewer.repository.bindingfragment.BindingFragment
 import dagger.hilt.android.AndroidEntryPoint
 import io.noties.markwon.Markwon
 import kotlinx.coroutines.flow.launchIn
@@ -20,23 +20,18 @@ import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class DetailInfoFragment : Fragment() {
-
-    private var _binding: DetailInfoFragmentBinding? = null
-    private val binding: DetailInfoFragmentBinding get() = _binding!!
+class DetailInfoFragment : BindingFragment<DetailInfoFragmentBinding>() {
 
     private val viewModel by viewModels<RepositoryInfoViewModel>()
 
     @Inject
     lateinit var markwon: Markwon
 
-    override fun onCreateView(
+    override fun createBinding(
         inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = DetailInfoFragmentBinding.inflate(inflater, container, false)
-        return binding.root
+        container: ViewGroup?
+    ): DetailInfoFragmentBinding {
+        return DetailInfoFragmentBinding.inflate(inflater, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -76,11 +71,6 @@ class DetailInfoFragment : Fragment() {
         viewModel.screenState.onEach {
             render(it)
         }.launchIn(lifecycleScope)
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 
     private fun render(detailInfoScreenState: DetailInfoScreenState) {

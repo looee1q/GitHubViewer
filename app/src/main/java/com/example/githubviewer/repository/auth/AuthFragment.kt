@@ -5,13 +5,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
 import com.example.githubviewer.R
 import com.example.githubviewer.databinding.AuthFragmentBinding
+import com.example.githubviewer.repository.bindingfragment.BindingFragment
 import com.example.githubviewer.repository.util.getColorFromFragment
 import com.example.githubviewer.repository.util.hideKeyboard
 import com.example.githubviewer.repository.util.setOnIMEActionDoneListener
@@ -20,20 +20,15 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
 @AndroidEntryPoint
-class AuthFragment : Fragment() {
-
-    private var _binding: AuthFragmentBinding? = null
-    private val binding get() = _binding!!
+class AuthFragment : BindingFragment<AuthFragmentBinding>() {
 
     private val viewModel: AuthViewModel by viewModels()
 
-    override fun onCreateView(
+    override fun createBinding(
         inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = AuthFragmentBinding.inflate(inflater, container, false)
-        return binding.root
+        container: ViewGroup?
+    ): AuthFragmentBinding {
+        return AuthFragmentBinding.inflate(inflater, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -72,11 +67,6 @@ class AuthFragment : Fragment() {
                 }
             }
         }.launchIn(lifecycleScope)
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 
     private fun loadingScreenState() {

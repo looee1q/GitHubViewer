@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -14,6 +13,7 @@ import androidx.navigation.navOptions
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.githubviewer.R
 import com.example.githubviewer.databinding.RepositoriesListFragmentBinding
+import com.example.githubviewer.repository.bindingfragment.BindingFragment
 import com.example.githubviewer.repository.repositorydetails.DetailInfoFragment
 import com.example.githubviewer.repository.util.getColorFromFragment
 import com.example.githubviewer.repository.util.setDivider
@@ -22,10 +22,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
 @AndroidEntryPoint
-class RepositoriesListFragment : Fragment() {
-
-    private var _binding: RepositoriesListFragmentBinding? = null
-    private val binding: RepositoriesListFragmentBinding get() = _binding!!
+class RepositoriesListFragment : BindingFragment<RepositoriesListFragmentBinding>() {
 
     private val viewModel: RepositoriesListViewModel by viewModels()
 
@@ -38,13 +35,11 @@ class RepositoriesListFragment : Fragment() {
         }
     }
 
-    override fun onCreateView(
+    override fun createBinding(
         inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = RepositoriesListFragmentBinding.inflate(inflater, container, false)
-        return binding.root
+        container: ViewGroup?
+    ): RepositoriesListFragmentBinding {
+        return RepositoriesListFragmentBinding.inflate(inflater, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -105,11 +100,6 @@ class RepositoriesListFragment : Fragment() {
                 navOptions = navOptions
             )
         }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 
     private fun showContent(repositoriesListScreenState: RepositoriesListScreenState.Loaded) {
