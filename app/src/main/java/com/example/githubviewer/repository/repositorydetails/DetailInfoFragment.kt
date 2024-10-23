@@ -17,6 +17,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.noties.markwon.Markwon
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class DetailInfoFragment : Fragment() {
@@ -26,9 +27,8 @@ class DetailInfoFragment : Fragment() {
 
     private val viewModel by viewModels<RepositoryInfoViewModel>()
 
-    private val markwon: Markwon by lazy {
-        Markwon.create(requireContext())
-    }
+    @Inject
+    lateinit var markwon: Markwon
 
     override fun onCreateView(
         inflater: LayoutInflater,
