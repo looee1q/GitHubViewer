@@ -53,7 +53,7 @@ class DetailInfoFragment : Fragment() {
         binding.leaveProfileButton.setOnClickListener {
             val navOptions = navOptions {
                 popUpTo(
-                    id = R.id.detailInfoFragment,
+                    id = R.id.repositoriesListFragment,
                     popUpToBuilder = { inclusive = true }
                 )
             }
