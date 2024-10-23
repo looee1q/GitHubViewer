@@ -1,19 +1,17 @@
 package com.example.githubviewer.repository.auth
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.commit
-import androidx.fragment.app.replace
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.navOptions
 import com.example.githubviewer.R
 import com.example.githubviewer.databinding.AuthFragmentBinding
-import com.example.githubviewer.repository.repositories.RepositoriesListFragment
 import com.example.githubviewer.repository.util.hideKeyboard
 import com.example.githubviewer.repository.util.setOnIMEActionDoneListener
 import dagger.hilt.android.AndroidEntryPoint
@@ -41,14 +39,12 @@ class AuthFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.signInButton.setOnClickListener {
-            Log.d("AuthFragment", "Нажал на кнопку sign in")
             viewModel.onSignButtonPressed(binding.inputEditText.text.toString())
             view.hideKeyboard()
             binding.inputEditText.clearFocus()
         }
 
         binding.inputEditText.setOnIMEActionDoneListener {
-            Log.d("AuthFragment", "Нажал на кнопку enter на клавиатуре")
             viewModel.onSignButtonPressed(binding.inputEditText.text.toString())
             view.hideKeyboard()
             binding.inputEditText.clearFocus()
@@ -60,10 +56,17 @@ class AuthFragment : Fragment() {
                 AuthScreenState.Loading -> loadingScreenState()
                 AuthScreenState.Initial -> initialScreenState()
                 AuthScreenState.Idle -> {
-                    parentFragmentManager.commit {
-                        setReorderingAllowed(true)
-                        replace<RepositoriesListFragment>(R.id.fragment_container_view)
+                    val navOptions = navOptions {
+                        popUpTo(
+                            id = R.id.authFragment,
+                            popUpToBuilder = { inclusive = true }
+                        )
                     }
+                    findNavController().navigate(
+                        resId = R.id.action_authFragment_to_repositoriesListFragment,
+                        args = null,
+                        navOptions = navOptions
+                    )
                 }
             }
         }.launchIn(lifecycleScope)
