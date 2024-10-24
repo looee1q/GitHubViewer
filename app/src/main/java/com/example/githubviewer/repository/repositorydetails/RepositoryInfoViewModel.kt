@@ -39,6 +39,17 @@ class RepositoryInfoViewModel @Inject constructor(
         deleteUserAuthToken()
     }
 
+    fun onRetryButtonPressed() {
+        if (screenState.value !is DetailInfoScreenState.Loaded) {
+            viewModelScope.launch {
+                getRepository()
+                getReadme()
+            }
+        } else {
+            getReadme()
+        }
+    }
+
     private suspend fun getRepository() {
         _screenState.value = DetailInfoScreenState.Loading
         viewModelScope.launch(Dispatchers.IO) {

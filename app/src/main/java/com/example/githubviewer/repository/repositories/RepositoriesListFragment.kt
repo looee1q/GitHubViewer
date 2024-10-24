@@ -100,6 +100,10 @@ class RepositoriesListFragment : BindingFragment<RepositoriesListFragmentBinding
                 navOptions = navOptions
             )
         }
+
+        binding.retryButton.setOnClickListener {
+            viewModel.onRetryButtonPressed()
+        }
     }
 
     private fun showContent(repositoriesListScreenState: RepositoriesListScreenState.Loaded) {

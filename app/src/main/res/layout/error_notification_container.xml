@@ -19,8 +19,10 @@
         android:id="@+id/error_main_description"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
         android:layout_marginTop="24dp"
         android:paddingVertical="6sp"
+        android:textAlignment="center"
         android:textColor="@color/red"
         android:textSize="16sp"
         tools:text="Connection error" />

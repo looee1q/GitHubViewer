@@ -65,7 +65,7 @@ class DetailInfoFragment : BindingFragment<DetailInfoFragmentBinding>() {
         }
 
         binding.retryButton.setOnClickListener {
-            //
+            viewModel.onRetryButtonPressed()
         }
 
         viewModel.screenState.onEach {

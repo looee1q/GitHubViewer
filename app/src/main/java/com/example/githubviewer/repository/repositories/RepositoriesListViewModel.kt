@@ -31,6 +31,10 @@ class RepositoriesListViewModel @Inject constructor(
         deleteUserAuthToken()
     }
 
+    fun onRetryButtonPressed() {
+        loadRepositories()
+    }
+
     private fun loadRepositories() {
         _screenState.value = RepositoriesListScreenState.Loading
         viewModelScope.launch(Dispatchers.IO) {
