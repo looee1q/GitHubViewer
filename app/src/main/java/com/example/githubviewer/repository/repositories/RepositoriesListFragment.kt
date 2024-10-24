@@ -1,7 +1,6 @@
 package com.example.githubviewer.repository.repositories
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -45,39 +44,8 @@ class RepositoriesListFragment : BindingFragment<RepositoriesListFragmentBinding
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.screenState.onEach { repositoriesListScreenState ->
-            when (repositoriesListScreenState) {
-
-                RepositoriesListScreenState.Initial -> Log.d(
-                    "RepositoriesListFragmen",
-                    "Состояние репозитория: Initial"
-                )
-
-                RepositoriesListScreenState.Loading -> {
-                    Log.d("RepositoriesListFragmen", "Состояние репозитория: Loading")
-                    showLoading()
-                }
-
-                is RepositoriesListScreenState.Loaded -> {
-                    Log.d("RepositoriesListFragmen", "Состояние репозитория: Loaded")
-                    showContent(repositoriesListScreenState)
-                }
-
-                RepositoriesListScreenState.Empty -> {
-                    Log.d("RepositoriesListFragmen", "Состояние репозитория: Empty")
-                    showNotionAboutEmptyRepositoriesList()
-                }
-
-                RepositoriesListScreenState.ErrorNoConnection -> {
-                    Log.d("RepositoriesListFragmen", "Состояние репозитория: ErrorNoConnection")
-                    showNotionAboutConnectionError()
-                }
-
-                is RepositoriesListScreenState.ErrorOther -> {
-                    Log.d("RepositoriesListFragmen", "Состояние репозитория: ErrorOther")
-                    showNotionAboutError(repositoriesListScreenState)
-                }
-            }
+        viewModel.screenState.onEach {
+            render(it)
         }.launchIn(lifecycleScope)
 
         binding.repositoriesRecyclerView.adapter = repositoriesListAdapter
@@ -106,7 +74,29 @@ class RepositoriesListFragment : BindingFragment<RepositoriesListFragmentBinding
         }
     }
 
-    private fun showContent(repositoriesListScreenState: RepositoriesListScreenState.Loaded) {
+    private fun render(repositoriesListScreenState: RepositoriesListScreenState) {
+        when (repositoriesListScreenState) {
+            RepositoriesListScreenState.Initial -> {}
+            RepositoriesListScreenState.Loading -> showLoadingState()
+            is RepositoriesListScreenState.Loaded -> showLoadedState(repositoriesListScreenState)
+            RepositoriesListScreenState.Empty -> showEmptyState()
+            RepositoriesListScreenState.ErrorNoConnection -> showNoConnectionState()
+            is RepositoriesListScreenState.ErrorOther -> {
+                showOtherErrorState(repositoriesListScreenState)
+            }
+        }
+    }
+
+    private fun showLoadingState() {
+        binding.repositoriesRecyclerView.isVisible = false
+        binding.progressBar.isVisible = true
+        binding.errorNotificationContainer.root.isVisible = false
+        binding.retryButton.isVisible = false
+    }
+
+    private fun showLoadedState(
+        repositoriesListScreenState: RepositoriesListScreenState.Loaded
+    ) {
         binding.repositoriesRecyclerView.isVisible = true
         binding.progressBar.isVisible = false
         binding.errorNotificationContainer.root.isVisible = false
@@ -114,14 +104,7 @@ class RepositoriesListFragment : BindingFragment<RepositoriesListFragmentBinding
         repositoriesListAdapter.repositoriesList = repositoriesListScreenState.repos
     }
 
-    private fun showLoading() {
-        binding.repositoriesRecyclerView.isVisible = false
-        binding.progressBar.isVisible = true
-        binding.errorNotificationContainer.root.isVisible = false
-        binding.retryButton.isVisible = false
-    }
-
-    private fun showNotionAboutEmptyRepositoriesList() {
+    private fun showEmptyState() {
         binding.repositoriesRecyclerView.isVisible = false
         binding.progressBar.isVisible = false
         binding.errorNotificationContainer.root.isVisible = true
@@ -135,7 +118,7 @@ class RepositoriesListFragment : BindingFragment<RepositoriesListFragmentBinding
         binding.retryButton.text = getString(R.string.refresh)
     }
 
-    private fun showNotionAboutConnectionError() {
+    private fun showNoConnectionState() {
         binding.repositoriesRecyclerView.isVisible = false
         binding.progressBar.isVisible = false
         binding.errorNotificationContainer.root.isVisible = true
@@ -149,7 +132,7 @@ class RepositoriesListFragment : BindingFragment<RepositoriesListFragmentBinding
         binding.retryButton.text = getString(R.string.retry)
     }
 
-    private fun showNotionAboutError(
+    private fun showOtherErrorState(
         repositoriesListScreenState: RepositoriesListScreenState.ErrorOther
     ) {
         binding.repositoriesRecyclerView.isVisible = false

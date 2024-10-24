@@ -46,30 +46,34 @@ class AuthFragment : BindingFragment<AuthFragmentBinding>() {
             binding.inputEditText.clearFocus()
         }
 
-        viewModel.screenState.onEach { authScreenState ->
-            when (authScreenState) {
-                AuthScreenState.Initial -> initialScreenState()
-                AuthScreenState.Loading -> loadingScreenState()
-                is AuthScreenState.InvalidInput -> invalidInputScreenState()
-                AuthScreenState.NoConnection -> noConnectionState()
-                AuthScreenState.Idle -> {
-                    val navOptions = navOptions {
-                        popUpTo(
-                            id = R.id.authFragment,
-                            popUpToBuilder = { inclusive = true }
-                        )
-                    }
-                    findNavController().navigate(
-                        resId = R.id.action_authFragment_to_repositoriesListFragment,
-                        args = null,
-                        navOptions = navOptions
-                    )
-                }
-            }
+        viewModel.screenState.onEach {
+            render(it)
         }.launchIn(lifecycleScope)
     }
 
-    private fun loadingScreenState() {
+    private fun render(authScreenState: AuthScreenState) {
+        when (authScreenState) {
+            AuthScreenState.Initial -> {}
+            AuthScreenState.Loading -> showLoadingState()
+            is AuthScreenState.InvalidInput -> showInvalidInputState()
+            AuthScreenState.NoConnection -> showNoConnectionState()
+            AuthScreenState.AuthSuccess -> {
+                val navOptions = navOptions {
+                    popUpTo(
+                        id = R.id.authFragment,
+                        popUpToBuilder = { inclusive = true }
+                    )
+                }
+                findNavController().navigate(
+                    resId = R.id.action_authFragment_to_repositoriesListFragment,
+                    args = null,
+                    navOptions = navOptions
+                )
+            }
+        }
+    }
+
+    private fun showLoadingState() {
         binding.errorNotificationContainer.root.isVisible = false
         binding.progressBarOnSignInButton.isVisible = true
         binding.textInputLayout.isVisible = true
@@ -77,15 +81,7 @@ class AuthFragment : BindingFragment<AuthFragmentBinding>() {
         binding.signInButton.text = getString(R.string.empty_string)
     }
 
-    private fun initialScreenState() {
-        binding.errorNotificationContainer.root.isVisible = false
-        binding.progressBarOnSignInButton.isVisible = false
-        binding.textInputLayout.isVisible = true
-        binding.textInputLayout.error = null
-        binding.signInButton.text = getText(R.string.sign_in)
-    }
-
-    private fun invalidInputScreenState() {
+    private fun showInvalidInputState() {
         binding.errorNotificationContainer.root.isVisible = false
         binding.progressBarOnSignInButton.isVisible = false
         binding.textInputLayout.isVisible = true
@@ -93,7 +89,7 @@ class AuthFragment : BindingFragment<AuthFragmentBinding>() {
         binding.signInButton.text = getText(R.string.sign_in)
     }
 
-    private fun noConnectionState() {
+    private fun showNoConnectionState() {
         binding.errorNotificationContainer.root.isVisible = true
         binding.progressBarOnSignInButton.isVisible = false
         binding.textInputLayout.isVisible = false

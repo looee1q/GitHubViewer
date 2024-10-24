@@ -4,7 +4,7 @@ sealed interface AuthScreenState {
 
     data object Initial : AuthScreenState
 
-    data object Idle : AuthScreenState
+    data object AuthSuccess : AuthScreenState
 
     data object Loading : AuthScreenState
 

@@ -26,7 +26,7 @@ class AuthViewModel @Inject constructor(
             _screenState.value = AuthScreenState.Loading
             viewModelScope.launch(Dispatchers.IO) {
                 when (val userAuthStatus = repository.singIn(inputToken)) {
-                    is UserAuthStatus.Authorized -> _screenState.value = AuthScreenState.Idle
+                    is UserAuthStatus.Authorized -> _screenState.value = AuthScreenState.AuthSuccess
                     is UserAuthStatus.NotAuthorized -> {
                         when (userAuthStatus.baseNetworkError) {
                             BaseNetworkError.NoConnection -> {
