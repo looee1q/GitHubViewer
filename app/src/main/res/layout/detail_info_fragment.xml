@@ -241,17 +241,13 @@
 
             <com.google.android.material.progressindicator.CircularProgressIndicator
                 android:id="@+id/readme_progress_bar"
+                style="@style/SmallCircularProgressIndicator"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                android:indeterminate="true"
-                android:visibility="visible"
-                app:indicatorColor="@color/white"
-                app:indicatorSize="24dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/stars_count_container"
-                app:trackThickness="3dp" />
+                app:layout_constraintTop_toBottomOf="@id/stars_count_container" />
 
             <include
                 android:id="@+id/readme_error_notification_container"
@@ -302,17 +298,12 @@
 
     <com.google.android.material.progressindicator.CircularProgressIndicator
         android:id="@+id/repository_progress_bar"
+        style="@style/BigCircularProgressIndicator"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:indeterminate="true"
-        android:visibility="gone"
-        app:indicatorColor="@color/white"
-        app:indicatorSize="56dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/screen_header_container"
-        app:trackThickness="7dp" />
+        app:layout_constraintTop_toBottomOf="@id/screen_header_container" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

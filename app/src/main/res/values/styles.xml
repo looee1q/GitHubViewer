@@ -21,4 +21,22 @@
         <item name="android:textAlignment">center</item>
         <item name="cornerRadius">8dp</item>
     </style>
+
+    <style name="BasicCircularProgressIndicator" parent="Widget.MaterialComponents.CircularProgressIndicator">
+        <item name="android:indeterminate">true</item>
+        <item name="android:visibility">visible</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="indicatorColor">@color/white</item>
+    </style>
+
+    <style name="BigCircularProgressIndicator" parent="BasicCircularProgressIndicator">
+        <item name="indicatorSize">56dp</item>
+        <item name="trackThickness">7dp</item>
+    </style>
+
+    <style name="SmallCircularProgressIndicator" parent="BasicCircularProgressIndicator">
+        <item name="indicatorSize">24dp</item>
+        <item name="trackThickness">3dp</item>
+    </style>
+
 </resources>
