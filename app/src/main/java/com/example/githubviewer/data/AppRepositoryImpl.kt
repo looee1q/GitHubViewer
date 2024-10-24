@@ -33,7 +33,6 @@ class AppRepositoryImpl @Inject constructor(
     private val repoReadmeMapper: Mapper<RepoReadmeDto, RepoReadme>,
 ) : AppRepository {
 
-    private val bearerToken: String get() = keyValueStorage.getKey()
     private var authorizedUser: UserInfo? = null
 
     override suspend fun getRepositories(): NetworkRequestResult<List<Repo>, BaseNetworkError> {
@@ -43,7 +42,6 @@ class AppRepositoryImpl @Inject constructor(
         return try {
             val userRepositories = apiService
                 .getListRepositoriesForUser(
-                    personalAccessToken = bearerToken,
                     perPage = REPOSITORIES_PER_PAGE,
                     username = getAuthorizedUser().login
                 )
@@ -63,7 +61,7 @@ class AppRepositoryImpl @Inject constructor(
         return try {
             val repositoryDetails = apiService
                 .getRepositoryDetails(
-                    personalAccessToken = bearerToken, repositoryOwner = getAuthorizedUser().login,
+                    repositoryOwner = getAuthorizedUser().login,
                     repositoryName = repositoryName
                 ).let(repoDetailsMapper::map)
             NetworkRequestResult.Success(repositoryDetails)
@@ -82,7 +80,7 @@ class AppRepositoryImpl @Inject constructor(
         return try {
             val repositoryReadme = apiService
                 .getRepositoryReadme(
-                    personalAccessToken = bearerToken, repositoryOwner = getAuthorizedUser().login,
+                    repositoryOwner = getAuthorizedUser().login,
                     repositoryName = repositoryName
                 ).run {
                     val encoded = this.copy(
@@ -95,7 +93,9 @@ class AppRepositoryImpl @Inject constructor(
             if (httpException.code() == NETWORK_ERROR_404) {
                 NetworkRequestResult.Error(ExtendedNetworkError.ResourceNotFoundError)
             } else {
-                NetworkRequestResult.Error(ExtendedNetworkError.OtherError(httpException.message.toString()))
+                NetworkRequestResult.Error(
+                    ExtendedNetworkError.OtherError(httpException.message.toString())
+                )
             }
         } catch (e: Exception) {
             NetworkRequestResult.Error(ExtendedNetworkError.OtherError(e.message.toString()))
@@ -108,7 +108,7 @@ class AppRepositoryImpl @Inject constructor(
         }
         val bearerToken = TOKEN_PREFIX + token
         return try {
-            val userInfo = apiService.authenticateUser(bearerToken).let(userInfoMapper::map)
+            val userInfo = apiService.authenticateUser().let(userInfoMapper::map)
             authorizedUser = userInfo
             keyValueStorage.saveKey(bearerToken)
             UserAuthStatus.Authorized(userInfo)
@@ -118,6 +118,7 @@ class AppRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getUserAuthStatus(): UserAuthStatus {
+        val bearerToken = keyValueStorage.getKey()
         return if (bearerToken.isNotEmpty()) {
             val token = bearerToken.removePrefix(TOKEN_PREFIX)
             singIn(token)
