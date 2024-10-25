@@ -15,7 +15,12 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Converter
 import retrofit2.Retrofit
 import retrofit2.create
+import javax.inject.Qualifier
 import javax.inject.Singleton
+
+@Qualifier
+@Retention(AnnotationRetention.RUNTIME)
+annotation class HttpTokenHeaderInterceptor
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -32,11 +37,16 @@ object ApiModule {
 
     @Singleton
     @Provides
+    @HttpTokenHeaderInterceptor
     fun provideHttpHeaderInterceptor(keyValueStorage: KeyValueStorage): Interceptor {
         return Interceptor { chain: Interceptor.Chain ->
             chain.proceed(
                 chain.request().newBuilder()
-                    .addHeader(HEADER_AUTHORIZATION, keyValueStorage.getKey())
+                    .headers(
+                        chain.request().headers.newBuilder()
+                            .addUnsafeNonAscii(HEADER_AUTHORIZATION, keyValueStorage.getKey())
+                            .build()
+                    )
                     .build()
             )
         }
@@ -46,11 +56,11 @@ object ApiModule {
     @Provides
     fun provideOkHttpClient(
         httpLoggingInterceptor: HttpLoggingInterceptor,
-        httpTokenHeaderInterceptor: Interceptor
+        @HttpTokenHeaderInterceptor httpTokenHeaderInterceptor: Interceptor
     ): OkHttpClient {
         return OkHttpClient.Builder()
-            .addInterceptor(httpLoggingInterceptor)
             .addInterceptor(httpTokenHeaderInterceptor)
+            .addInterceptor(httpLoggingInterceptor)
             .build()
     }
 

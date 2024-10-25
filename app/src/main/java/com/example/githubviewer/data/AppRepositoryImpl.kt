@@ -108,9 +108,9 @@ class AppRepositoryImpl @Inject constructor(
         }
         val bearerToken = TOKEN_PREFIX + token
         return try {
+            keyValueStorage.saveKey(bearerToken)
             val userInfo = apiService.authenticateUser().let(userInfoMapper::map)
             authorizedUser = userInfo
-            keyValueStorage.saveKey(bearerToken)
             UserAuthStatus.Authorized(userInfo)
         } catch (e: Exception) {
             UserAuthStatus.NotAuthorized(BaseNetworkError.OtherError(e.message.toString()))
