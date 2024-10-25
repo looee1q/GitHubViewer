@@ -1,5 +1,6 @@
 package com.example.githubviewer.repository.auth
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -14,6 +15,7 @@ import com.example.githubviewer.databinding.AuthFragmentBinding
 import com.example.githubviewer.repository.bindingfragment.BindingFragment
 import com.example.githubviewer.repository.util.getColorFromFragment
 import com.example.githubviewer.repository.util.hideKeyboard
+import com.example.githubviewer.repository.util.setKeyboardVisibilityListener
 import com.example.githubviewer.repository.util.setOnIMEActionDoneListener
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.launchIn
@@ -49,6 +51,20 @@ class AuthFragment : BindingFragment<AuthFragmentBinding>() {
         viewModel.screenState.onEach {
             render(it)
         }.launchIn(lifecycleScope)
+
+        setKeyboardVisibilityListener(
+            parentView = binding.root,
+            onKeyboardHidden = {
+                if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                    binding.logoIcon.isVisible = true
+                }
+            },
+            onKeyboardShown = {
+                if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                    binding.logoIcon.isVisible = false
+                }
+            }
+        )
     }
 
     private fun render(authScreenState: AuthScreenState) {
@@ -79,6 +95,7 @@ class AuthFragment : BindingFragment<AuthFragmentBinding>() {
         binding.textInputLayout.isVisible = true
         binding.textInputLayout.error = null
         binding.signInButton.text = getString(R.string.empty_string)
+        binding.logoIcon.isVisible = true
     }
 
     private fun showInvalidInputState() {
@@ -87,6 +104,7 @@ class AuthFragment : BindingFragment<AuthFragmentBinding>() {
         binding.textInputLayout.isVisible = true
         binding.textInputLayout.error = getString(R.string.invalid_token)
         binding.signInButton.text = getText(R.string.sign_in)
+        binding.logoIcon.isVisible = true
     }
 
     private fun showNoConnectionState() {
@@ -99,6 +117,10 @@ class AuthFragment : BindingFragment<AuthFragmentBinding>() {
             errorMainDescription.text = getString(R.string.connection_error)
             errorMainDescription.setTextColor(getColorFromFragment(R.color.red))
             errorAuxiliaryDescription.text = getString(R.string.check_your_internet_connection)
+        }
+        when (resources.configuration.orientation) {
+            Configuration.ORIENTATION_PORTRAIT -> binding.logoIcon.isVisible = true
+            Configuration.ORIENTATION_LANDSCAPE -> binding.logoIcon.isVisible = false
         }
     }
 }
