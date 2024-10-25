@@ -37,15 +37,11 @@ class AuthFragment : BindingFragment<AuthFragmentBinding>() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.signInButton.setOnClickListener {
-            viewModel.onSignButtonPressed(binding.inputEditText.text.toString())
-            view.hideKeyboard()
-            binding.inputEditText.clearFocus()
+            signInActions()
         }
 
         binding.inputEditText.setOnIMEActionDoneListener {
-            viewModel.onSignButtonPressed(binding.inputEditText.text.toString())
-            view.hideKeyboard()
-            binding.inputEditText.clearFocus()
+            signInActions()
         }
 
         viewModel.screenState.onEach {
@@ -65,6 +61,12 @@ class AuthFragment : BindingFragment<AuthFragmentBinding>() {
                 }
             }
         )
+    }
+
+    private fun signInActions() {
+        viewModel.onSignButtonPressed(binding.inputEditText.text.toString())
+        requireView().hideKeyboard()
+        binding.inputEditText.clearFocus()
     }
 
     private fun render(authScreenState: AuthScreenState) {
