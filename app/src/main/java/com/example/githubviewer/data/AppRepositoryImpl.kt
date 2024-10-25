@@ -41,9 +41,8 @@ class AppRepositoryImpl @Inject constructor(
         }
         return try {
             val userRepositories = apiService
-                .getListRepositoriesForUser(
+                .getListRepositoriesForAuthenticatedUser(
                     perPage = REPOSITORIES_PER_PAGE,
-                    username = getAuthorizedUser().login
                 )
                 .map { repoMapper.map(it) }
             NetworkRequestResult.Success(userRepositories)

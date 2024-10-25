@@ -13,10 +13,10 @@ interface GitHubApiService {
     @GET("user")
     suspend fun authenticateUser(): UserInfoDto
 
-    @GET("users/{username}/repos")
-    suspend fun getListRepositoriesForUser(
-        @Path("username") username: String,
-        @Query("per_page") perPage: Int
+    @GET("user/repos")
+    suspend fun getListRepositoriesForAuthenticatedUser(
+        @Query("per_page") perPage: Int,
+        @Query("sort") sort: String = "created"
     ): List<RepoDto>
 
     @GET("repos/{owner}/{repo}")
