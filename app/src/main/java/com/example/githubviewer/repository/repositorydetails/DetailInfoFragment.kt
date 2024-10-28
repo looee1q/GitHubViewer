@@ -13,6 +13,7 @@ import androidx.navigation.navOptions
 import com.example.githubviewer.R
 import com.example.githubviewer.databinding.DetailInfoFragmentBinding
 import com.example.githubviewer.repository.bindingfragment.BindingFragment
+import com.example.githubviewer.repository.util.openWebPage
 import dagger.hilt.android.AndroidEntryPoint
 import io.noties.markwon.Markwon
 import kotlinx.coroutines.flow.launchIn
@@ -61,7 +62,10 @@ class DetailInfoFragment : BindingFragment<DetailInfoFragmentBinding>() {
         }
 
         binding.linkText.setOnClickListener {
-            //
+            openWebPage(
+                context = requireContext(),
+                url = binding.linkText.text.toString()
+            )
         }
 
         binding.retryButton.setOnClickListener {
