@@ -1,7 +1,6 @@
 package com.example.githubviewer.data
 
 import android.net.ConnectivityManager
-import android.util.Log
 import com.example.githubviewer.data.model.RepoDetailsDto
 import com.example.githubviewer.data.model.RepoDto
 import com.example.githubviewer.data.model.RepoReadmeDto
@@ -34,7 +33,7 @@ class AppRepositoryImpl @Inject constructor(
     private val repoReadmeMapper: Mapper<RepoReadmeDto, RepoReadme>,
 ) : AppRepository {
 
-    private val bearerToken: String get() = keyValueStorage.getKey()
+    private var authorizedUser: UserInfo? = null
 
     override suspend fun getRepositories(): NetworkRequestResult<List<Repo>, BaseNetworkError> {
         if (!connectivityManager.isDeviceConnectedToNetwork()) {
@@ -42,15 +41,12 @@ class AppRepositoryImpl @Inject constructor(
         }
         return try {
             val userRepositories = apiService
-                .getListRepositoriesForUser(
-                    personalAccessToken = bearerToken,
-                    perPage = 10,
-                    username = "looee1q"
+                .getListRepositoriesForAuthenticatedUser(
+                    perPage = REPOSITORIES_PER_PAGE,
                 )
                 .map { repoMapper.map(it) }
             NetworkRequestResult.Success(userRepositories)
         } catch (e: Exception) {
-            Log.d("AppRepositoryImpl", "$e с описанием: ${e.message.toString()}")
             NetworkRequestResult.Error(BaseNetworkError.OtherError(e.message.toString()))
         }
     }
@@ -64,15 +60,11 @@ class AppRepositoryImpl @Inject constructor(
         return try {
             val repositoryDetails = apiService
                 .getRepositoryDetails(
-                    personalAccessToken = bearerToken,
-                    repositoryOwner = "looee1q",
+                    repositoryOwner = getAuthorizedUser().login,
                     repositoryName = repositoryName
-                ).run {
-                    repoDetailsMapper.map(this)
-                }
+                ).let(repoDetailsMapper::map)
             NetworkRequestResult.Success(repositoryDetails)
         } catch (e: Exception) {
-            Log.d("AppRepositoryImpl", "$e с описанием: ${e.message.toString()}")
             NetworkRequestResult.Error(BaseNetworkError.OtherError(e.message.toString()))
         }
     }
@@ -87,8 +79,7 @@ class AppRepositoryImpl @Inject constructor(
         return try {
             val repositoryReadme = apiService
                 .getRepositoryReadme(
-                    personalAccessToken = bearerToken,
-                    repositoryOwner = "looee1q",
+                    repositoryOwner = getAuthorizedUser().login,
                     repositoryName = repositoryName
                 ).run {
                     val encoded = this.copy(
@@ -98,39 +89,55 @@ class AppRepositoryImpl @Inject constructor(
                 }
             NetworkRequestResult.Success(repositoryReadme)
         } catch (httpException: HttpException) {
-            if (httpException.code() == 404) {
+            if (httpException.code() == NETWORK_ERROR_404) {
                 NetworkRequestResult.Error(ExtendedNetworkError.ResourceNotFoundError)
             } else {
-                NetworkRequestResult.Error(ExtendedNetworkError.OtherError(httpException.message.toString()))
+                NetworkRequestResult.Error(
+                    ExtendedNetworkError.OtherError(httpException.message.toString())
+                )
             }
         } catch (e: Exception) {
-            Log.d("AppRepositoryImpl", "$e с описанием: ${e.message.toString()}")
             NetworkRequestResult.Error(ExtendedNetworkError.OtherError(e.message.toString()))
         }
     }
 
     override suspend fun singIn(token: String): UserAuthStatus {
+        if (!connectivityManager.isDeviceConnectedToNetwork()) {
+            return UserAuthStatus.NotAuthorized(BaseNetworkError.NoConnection)
+        }
         val bearerToken = TOKEN_PREFIX + token
         return try {
-            val userInfoDto = apiService.authenticateUser(bearerToken)
             keyValueStorage.saveKey(bearerToken)
-            UserAuthStatus.Authorized(userInfoMapper.map(userInfoDto))
+            val userInfo = apiService.authenticateUser().let(userInfoMapper::map)
+            authorizedUser = userInfo
+            UserAuthStatus.Authorized(userInfo)
         } catch (e: Exception) {
-            UserAuthStatus.NotAuthorized(e.message.toString())
+            UserAuthStatus.NotAuthorized(BaseNetworkError.OtherError(e.message.toString()))
         }
     }
 
     override suspend fun getUserAuthStatus(): UserAuthStatus {
-        Log.d("AppRepositoryImpl", "bearer token is $bearerToken")
+        val bearerToken = keyValueStorage.getKey()
         return if (bearerToken.isNotEmpty()) {
             val token = bearerToken.removePrefix(TOKEN_PREFIX)
             singIn(token)
         } else {
-            UserAuthStatus.NotAuthorized("")
+            UserAuthStatus.NotAuthorized(BaseNetworkError.OtherError(""))
         }
+    }
+
+    override fun deleteUserAuthToken() {
+        keyValueStorage.removeKey()
+    }
+
+    private fun getAuthorizedUser(): UserInfo {
+        return authorizedUser ?: throw RuntimeException(NO_USER_IS_AUTHORIZED_EXCEPTION)
     }
 
     companion object {
         private const val TOKEN_PREFIX = "Bearer "
+        private const val REPOSITORIES_PER_PAGE = 10
+        private const val NETWORK_ERROR_404 = 404
+        private const val NO_USER_IS_AUTHORIZED_EXCEPTION = "No user is authorized"
     }
 }

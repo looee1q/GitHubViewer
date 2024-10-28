@@ -27,6 +27,14 @@ class RepositoriesListViewModel @Inject constructor(
         loadRepositories()
     }
 
+    fun onLogoutButtonPressed() {
+        deleteUserAuthToken()
+    }
+
+    fun onRetryButtonPressed() {
+        loadRepositories()
+    }
+
     private fun loadRepositories() {
         _screenState.value = RepositoriesListScreenState.Loading
         viewModelScope.launch(Dispatchers.IO) {
@@ -56,5 +64,9 @@ class RepositoriesListViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    private fun deleteUserAuthToken() {
+        repository.deleteUserAuthToken()
     }
 }

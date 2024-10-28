@@ -5,34 +5,28 @@ import com.example.githubviewer.data.model.RepoDto
 import com.example.githubviewer.data.model.RepoReadmeDto
 import com.example.githubviewer.data.model.UserInfoDto
 import retrofit2.http.GET
-import retrofit2.http.Header
 import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface GitHubApiService {
 
     @GET("user")
-    suspend fun authenticateUser(
-        @Header("Authorization") personalAccessToken: String
-    ): UserInfoDto
+    suspend fun authenticateUser(): UserInfoDto
 
-    @GET("users/{username}/repos")
-    suspend fun getListRepositoriesForUser(
-        @Header("Authorization") personalAccessToken: String,
-        @Path("username") username: String,
-        @Query("per_page") perPage: Int
+    @GET("user/repos")
+    suspend fun getListRepositoriesForAuthenticatedUser(
+        @Query("per_page") perPage: Int,
+        @Query("sort") sort: String = "created"
     ): List<RepoDto>
 
     @GET("repos/{owner}/{repo}")
     suspend fun getRepositoryDetails(
-        @Header("Authorization") personalAccessToken: String,
         @Path("owner") repositoryOwner: String,
         @Path("repo") repositoryName: String,
     ): RepoDetailsDto
 
     @GET("repos/{owner}/{repo}/readme")
     suspend fun getRepositoryReadme(
-        @Header("Authorization") personalAccessToken: String,
         @Path("owner") repositoryOwner: String,
         @Path("repo") repositoryName: String,
     ): RepoReadmeDto

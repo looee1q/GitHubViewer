@@ -25,15 +25,7 @@ class MainViewModel @Inject constructor(
 
     private fun getUserAuthStatus() {
         viewModelScope.launch(Dispatchers.IO) {
-            when (val userAuthStatus = repository.getUserAuthStatus()) {
-                is UserAuthStatus.Authorized -> {
-                    _userAuthStatus.value = UserAuthStatus.Authorized(userAuthStatus.userInfo)
-                }
-
-                is UserAuthStatus.NotAuthorized -> {
-                    _userAuthStatus.value = UserAuthStatus.NotAuthorized(userAuthStatus.message)
-                }
-            }
+            _userAuthStatus.value = repository.getUserAuthStatus()
         }
     }
 }
