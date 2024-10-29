@@ -1,5 +1,6 @@
 package com.example.githubviewer.repository.auth
 
+import android.app.AlertDialog
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -48,6 +49,9 @@ class AuthFragment : BindingFragment<AuthFragmentBinding>() {
             renderScreenState(it)
             if (it is AuthScreenState.AuthSuccess) {
                 navigateFromAuthFragment()
+            }
+            if (it is AuthScreenState.InvalidInput) {
+                createErrorDialog(it.reason).show()
             }
         }.launchIn(lifecycleScope)
 
@@ -110,5 +114,13 @@ class AuthFragment : BindingFragment<AuthFragmentBinding>() {
             args = null,
             navOptions = navOptions
         )
+    }
+
+    private fun createErrorDialog(errorMessage: String): AlertDialog {
+        return AlertDialog.Builder(requireContext(), R.style.CustomAlertDialogTheme)
+            .setTitle(getString(R.string.error))
+            .setMessage(errorMessage)
+            .setPositiveButton(getString(R.string.ok), null)
+            .create()
     }
 }
