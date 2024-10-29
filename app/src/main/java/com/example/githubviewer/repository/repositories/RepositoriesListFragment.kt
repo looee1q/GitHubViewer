@@ -45,7 +45,7 @@ class RepositoriesListFragment : BindingFragment<RepositoriesListFragmentBinding
         super.onViewCreated(view, savedInstanceState)
 
         viewModel.screenState.onEach {
-            render(it)
+            renderScreenState(it)
         }.launchIn(lifecycleScope)
 
         binding.repositoriesRecyclerView.adapter = repositoriesListAdapter
@@ -74,77 +74,81 @@ class RepositoriesListFragment : BindingFragment<RepositoriesListFragmentBinding
         }
     }
 
-    private fun render(repositoriesListScreenState: RepositoriesListScreenState) {
-        when (repositoriesListScreenState) {
-            RepositoriesListScreenState.Initial -> {}
-            RepositoriesListScreenState.Loading -> showLoadingState()
-            is RepositoriesListScreenState.Loaded -> showLoadedState(repositoriesListScreenState)
-            RepositoriesListScreenState.Empty -> showEmptyState()
-            RepositoriesListScreenState.ErrorNoConnection -> showNoConnectionState()
-            is RepositoriesListScreenState.ErrorOther -> {
-                showOtherErrorState(repositoriesListScreenState)
+    private fun renderScreenState(state: RepositoriesListScreenState) {
+        binding.repositoriesRecyclerView.isVisible = state is RepositoriesListScreenState.Loaded
+        binding.progressBar.isVisible = state is RepositoriesListScreenState.Loading
+
+        binding.errorNotificationContainer.root.isVisible =
+            state is RepositoriesListScreenState.Empty
+                    || state is RepositoriesListScreenState.ErrorNoConnection
+                    || state is RepositoriesListScreenState.ErrorOther
+
+        binding.retryButton.isVisible = state is RepositoriesListScreenState.Empty
+                || state is RepositoriesListScreenState.ErrorNoConnection
+                || state is RepositoriesListScreenState.ErrorOther
+
+        repositoriesListAdapter.repositoriesList =
+            if (state is RepositoriesListScreenState.Loaded) {
+                state.repos
+            } else {
+                emptyList()
+            }
+
+        binding.retryButton.text = when (state) {
+            is RepositoriesListScreenState.Empty -> getString(R.string.refresh)
+            is RepositoriesListScreenState.ErrorOther -> getString(R.string.retry)
+            is RepositoriesListScreenState.ErrorNoConnection -> getString(R.string.retry)
+            else -> getString(R.string.empty_string)
+        }
+
+        with(binding.errorNotificationContainer.errorImage) {
+            when (state) {
+                is RepositoriesListScreenState.Empty -> setImageResource(R.drawable.ic_empty_list)
+                is RepositoriesListScreenState.ErrorNoConnection -> {
+                    setImageResource(R.drawable.ic_no_connection)
+                }
+
+                is RepositoriesListScreenState.ErrorOther -> {
+                    setImageResource(R.drawable.ic_something_error)
+                }
+
+                else -> {}
             }
         }
-    }
 
-    private fun showLoadingState() {
-        binding.repositoriesRecyclerView.isVisible = false
-        binding.progressBar.isVisible = true
-        binding.errorNotificationContainer.root.isVisible = false
-        binding.retryButton.isVisible = false
-    }
-
-    private fun showLoadedState(
-        repositoriesListScreenState: RepositoriesListScreenState.Loaded
-    ) {
-        binding.repositoriesRecyclerView.isVisible = true
-        binding.progressBar.isVisible = false
-        binding.errorNotificationContainer.root.isVisible = false
-        binding.retryButton.isVisible = false
-        repositoriesListAdapter.repositoriesList = repositoriesListScreenState.repos
-    }
-
-    private fun showEmptyState() {
-        binding.repositoriesRecyclerView.isVisible = false
-        binding.progressBar.isVisible = false
-        binding.errorNotificationContainer.root.isVisible = true
-        binding.retryButton.isVisible = true
-        with(binding.errorNotificationContainer) {
-            errorImage.setImageResource(R.drawable.ic_empty_list)
-            errorMainDescription.text = getString(R.string.empty)
-            errorMainDescription.setTextColor(getColorFromFragment(R.color.secondary))
-            errorAuxiliaryDescription.text = getString(R.string.no_repositories_at_the_moment)
+        binding.errorNotificationContainer.errorMainDescription.text = when (state) {
+            is RepositoriesListScreenState.Empty -> getString(R.string.empty)
+            is RepositoriesListScreenState.ErrorNoConnection -> getString(R.string.connection_error)
+            is RepositoriesListScreenState.ErrorOther -> state.error
+            else -> getString(R.string.empty_string)
         }
-        binding.retryButton.text = getString(R.string.refresh)
-    }
 
-    private fun showNoConnectionState() {
-        binding.repositoriesRecyclerView.isVisible = false
-        binding.progressBar.isVisible = false
-        binding.errorNotificationContainer.root.isVisible = true
-        binding.retryButton.isVisible = true
-        with(binding.errorNotificationContainer) {
-            errorImage.setImageResource(R.drawable.ic_no_connection)
-            errorMainDescription.text = getString(R.string.connection_error)
-            errorMainDescription.setTextColor(getColorFromFragment(R.color.red))
-            errorAuxiliaryDescription.text = getString(R.string.check_your_internet_connection)
-        }
-        binding.retryButton.text = getString(R.string.retry)
-    }
+        with(binding.errorNotificationContainer.errorMainDescription) {
+            when (state) {
+                is RepositoriesListScreenState.Empty -> {
+                    setTextColor(getColorFromFragment(R.color.secondary))
+                }
 
-    private fun showOtherErrorState(
-        repositoriesListScreenState: RepositoriesListScreenState.ErrorOther
-    ) {
-        binding.repositoriesRecyclerView.isVisible = false
-        binding.progressBar.isVisible = false
-        binding.errorNotificationContainer.root.isVisible = true
-        binding.retryButton.isVisible = true
-        with(binding.errorNotificationContainer) {
-            errorImage.setImageResource(R.drawable.ic_something_error)
-            errorMainDescription.text = repositoriesListScreenState.error
-            errorMainDescription.setTextColor(getColorFromFragment(R.color.red))
-            errorAuxiliaryDescription.text = getString(R.string.try_again_later)
+                is RepositoriesListScreenState.ErrorNoConnection,
+                is RepositoriesListScreenState.ErrorOther -> {
+                    setTextColor(getColorFromFragment(R.color.red))
+                }
+
+                else -> {}
+            }
         }
-        binding.retryButton.text = getString(R.string.retry)
+
+        binding.errorNotificationContainer.errorAuxiliaryDescription.text = when (state) {
+            is RepositoriesListScreenState.Empty -> {
+                getString(R.string.no_repositories_at_the_moment)
+            }
+
+            is RepositoriesListScreenState.ErrorNoConnection -> {
+                getString(R.string.check_your_internet_connection)
+            }
+
+            is RepositoriesListScreenState.ErrorOther -> getString(R.string.try_again_later)
+            else -> getString(R.string.empty_string)
+        }
     }
 }
