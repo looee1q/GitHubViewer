@@ -45,7 +45,10 @@ class AuthFragment : BindingFragment<AuthFragmentBinding>() {
         }
 
         viewModel.screenState.onEach {
-            render(it)
+            renderScreenState(it)
+            if (it is AuthScreenState.AuthSuccess) {
+                navigateFromAuthFragment()
+            }
         }.launchIn(lifecycleScope)
 
         setKeyboardVisibilityListener(
@@ -69,60 +72,43 @@ class AuthFragment : BindingFragment<AuthFragmentBinding>() {
         binding.inputEditText.clearFocus()
     }
 
-    private fun render(authScreenState: AuthScreenState) {
-        when (authScreenState) {
-            AuthScreenState.Initial -> {}
-            AuthScreenState.Loading -> showLoadingState()
-            is AuthScreenState.InvalidInput -> showInvalidInputState()
-            AuthScreenState.NoConnection -> showNoConnectionState()
-            AuthScreenState.AuthSuccess -> {
-                val navOptions = navOptions {
-                    popUpTo(
-                        id = R.id.authFragment,
-                        popUpToBuilder = { inclusive = true }
-                    )
-                }
-                findNavController().navigate(
-                    resId = R.id.action_authFragment_to_repositoriesListFragment,
-                    args = null,
-                    navOptions = navOptions
-                )
-            }
+    private fun renderScreenState(state: AuthScreenState) {
+        binding.progressBarOnSignInButton.isVisible = state is AuthScreenState.Loading
+        binding.textInputLayout.isVisible = state !is AuthScreenState.NoConnection
+
+        binding.logoIcon.isVisible = !(state is AuthScreenState.NoConnection
+                && resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
+
+        binding.textInputLayout.error = if (state is AuthScreenState.InvalidInput) {
+            getString(R.string.invalid_token)
+        } else null
+
+        binding.signInButton.text = when (state) {
+            is AuthScreenState.Loading -> getString(R.string.empty_string)
+            is AuthScreenState.NoConnection -> getText(R.string.retry)
+            else -> getText(R.string.sign_in)
         }
-    }
 
-    private fun showLoadingState() {
-        binding.errorNotificationContainer.root.isVisible = false
-        binding.progressBarOnSignInButton.isVisible = true
-        binding.textInputLayout.isVisible = true
-        binding.textInputLayout.error = null
-        binding.signInButton.text = getString(R.string.empty_string)
-        binding.logoIcon.isVisible = true
-    }
-
-    private fun showInvalidInputState() {
-        binding.errorNotificationContainer.root.isVisible = false
-        binding.progressBarOnSignInButton.isVisible = false
-        binding.textInputLayout.isVisible = true
-        binding.textInputLayout.error = getString(R.string.invalid_token)
-        binding.signInButton.text = getText(R.string.sign_in)
-        binding.logoIcon.isVisible = true
-    }
-
-    private fun showNoConnectionState() {
-        binding.errorNotificationContainer.root.isVisible = true
-        binding.progressBarOnSignInButton.isVisible = false
-        binding.textInputLayout.isVisible = false
-        binding.signInButton.text = getText(R.string.retry)
         with(binding.errorNotificationContainer) {
+            root.isVisible = state is AuthScreenState.NoConnection
             errorImage.setImageResource(R.drawable.ic_no_connection)
             errorMainDescription.text = getString(R.string.connection_error)
             errorMainDescription.setTextColor(getColorFromFragment(R.color.red))
             errorAuxiliaryDescription.text = getString(R.string.check_your_internet_connection)
         }
-        when (resources.configuration.orientation) {
-            Configuration.ORIENTATION_PORTRAIT -> binding.logoIcon.isVisible = true
-            Configuration.ORIENTATION_LANDSCAPE -> binding.logoIcon.isVisible = false
+    }
+
+    private fun navigateFromAuthFragment() {
+        val navOptions = navOptions {
+            popUpTo(
+                id = R.id.authFragment,
+                popUpToBuilder = { inclusive = true }
+            )
         }
+        findNavController().navigate(
+            resId = R.id.action_authFragment_to_repositoriesListFragment,
+            args = null,
+            navOptions = navOptions
+        )
     }
 }

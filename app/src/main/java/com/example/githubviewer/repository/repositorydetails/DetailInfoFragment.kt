@@ -73,142 +73,155 @@ class DetailInfoFragment : BindingFragment<DetailInfoFragmentBinding>() {
         }
 
         viewModel.screenState.onEach {
-            render(it)
+            renderScreenState(it)
+            if (it is DetailInfoScreenState.Loaded) {
+                renderReadmeState(it.readmeState)
+            }
         }.launchIn(lifecycleScope)
     }
 
-    private fun render(detailInfoScreenState: DetailInfoScreenState) {
-        when (detailInfoScreenState) {
-            DetailInfoScreenState.Initial -> {}
-            DetailInfoScreenState.Loading -> showLoadingState()
-            is DetailInfoScreenState.Loaded -> showLoadedState(detailInfoScreenState)
-            DetailInfoScreenState.ErrorNoConnection -> showNoConnectionState()
-            is DetailInfoScreenState.ErrorOther -> showOtherErrorState(detailInfoScreenState)
+    private fun renderScreenState(state: DetailInfoScreenState) {
+        binding.contentScrollView.isVisible = state is DetailInfoScreenState.Loaded
+        binding.repositoryProgressBar.isVisible = state is DetailInfoScreenState.Loading
+
+        binding.repositoryErrorNotificationContainer.root.isVisible =
+            state is DetailInfoScreenState.ErrorNoConnection
+                    || state is DetailInfoScreenState.ErrorOther
+
+        binding.retryButton.isVisible = state is DetailInfoScreenState.ErrorNoConnection
+                || state is DetailInfoScreenState.ErrorOther
+
+        with(binding.repositoryErrorNotificationContainer.errorImage) {
+            when (state) {
+                is DetailInfoScreenState.ErrorNoConnection -> {
+                    setImageResource(R.drawable.ic_no_connection)
+                }
+
+                is DetailInfoScreenState.ErrorOther -> {
+                    setImageResource(R.drawable.ic_something_error)
+                }
+
+                else -> {}
+            }
         }
-    }
 
-    private fun showLoadingState() {
-        binding.contentScrollView.isVisible = false
-        binding.repositoryProgressBar.isVisible = true
-        binding.repositoryErrorNotificationContainer.root.isVisible = false
-        binding.retryButton.isVisible = false
-    }
-
-    private fun showLoadedState(detailInfoScreenState: DetailInfoScreenState.Loaded) {
-        val repoDetails = detailInfoScreenState.repoDetails
-        binding.contentScrollView.isVisible = true
-        binding.linkText.text = repoDetails.url
-        if (repoDetails.licenseName.isNotEmpty()) {
-            binding.licenseInfoContainer.isVisible = true
-            binding.licenseNameText.text = repoDetails.licenseName
-        } else {
-            binding.licenseInfoContainer.isVisible = false
+        binding.repositoryErrorNotificationContainer.errorMainDescription.text = when (state) {
+            is DetailInfoScreenState.ErrorNoConnection -> getString(R.string.connection_error)
+            is DetailInfoScreenState.ErrorOther -> state.error
+            else -> getString(R.string.empty_string)
         }
-        binding.starsCountNumber.text = repoDetails.stargazersCount.toString()
-        binding.starsTitle.text = resources.getQuantityString(
-            R.plurals.star_plurals, repoDetails.stargazersCount
-        )
-        binding.forksCountNumber.text = repoDetails.forksCount.toString()
-        binding.forksTitle.text = resources.getQuantityString(
-            R.plurals.fork_plurals, repoDetails.forksCount
-        )
-        binding.watchersCountNumber.text = repoDetails.watchersCount.toString()
-        binding.watchersTitle.text = resources.getQuantityString(
-            R.plurals.watcher_plurals, repoDetails.watchersCount
-        )
-        binding.repositoryProgressBar.isVisible = false
-        binding.repositoryErrorNotificationContainer.root.isVisible = false
-        binding.retryButton.isVisible = false
 
-        val readmeState = detailInfoScreenState.readmeState
-        renderReadmeState(readmeState)
-    }
-
-    private fun showNoConnectionState() {
-        binding.contentScrollView.isVisible = false
-        binding.repositoryProgressBar.isVisible = false
-        binding.repositoryErrorNotificationContainer.root.isVisible = true
-        binding.retryButton.isVisible = true
-        with(binding.repositoryErrorNotificationContainer) {
-            errorImage.setImageResource(R.drawable.ic_no_connection)
-            errorMainDescription.text = getString(R.string.connection_error)
-            errorAuxiliaryDescription.text = getString(R.string.check_your_internet_connection)
-        }
-    }
-
-    private fun showOtherErrorState(detailInfoScreenState: DetailInfoScreenState.ErrorOther) {
-        binding.contentScrollView.isVisible = false
-        binding.repositoryProgressBar.isVisible = false
-        binding.repositoryErrorNotificationContainer.root.isVisible = true
-        binding.retryButton.isVisible = true
-        with(binding.repositoryErrorNotificationContainer) {
-            errorImage.setImageResource(R.drawable.ic_something_error)
-            errorMainDescription.text = detailInfoScreenState.error
-            errorAuxiliaryDescription.text = getString(R.string.try_again_later)
-        }
-    }
-
-    private fun renderReadmeState(readmeState: ReadmeState) {
-        when (readmeState) {
-            ReadmeState.Initial -> {}
-            ReadmeState.Loading -> showReadmeLoadingState()
-            is ReadmeState.Loaded -> showReadmeLoadedState(readmeState)
-            ReadmeState.Empty -> showReadmeEmptyState()
-            ReadmeState.NotExists -> showReadmeNotExistsState()
-            ReadmeState.ErrorNoConnection -> showReadmeNoConnectionState()
-            is ReadmeState.ErrorOther -> showReadmeOtherErrorState(readmeState)
-        }
-    }
-
-    private fun showReadmeLoadingState() {
-        binding.readmeContent.isVisible = false
-        binding.readmeProgressBar.isVisible = true
-        binding.readmeErrorNotificationContainer.root.isVisible = false
-    }
-
-    private fun showReadmeLoadedState(readmeState: ReadmeState.Loaded) {
-        binding.readmeContent.isVisible = true
-        binding.readmeProgressBar.isVisible = false
-        binding.readmeErrorNotificationContainer.root.isVisible = false
-        markwon.setMarkdown(binding.readmeContent, readmeState.markdown)
-    }
-
-    private fun showReadmeEmptyState() {
-        binding.readmeContent.isVisible = true
-        binding.readmeProgressBar.isVisible = false
-        binding.readmeErrorNotificationContainer.root.isVisible = false
-        markwon.setMarkdown(binding.readmeContent, getString(R.string.readme_is_empty))
-    }
-
-    private fun showReadmeNotExistsState() {
-        binding.readmeContent.isVisible = true
-        binding.readmeProgressBar.isVisible = false
-        binding.readmeErrorNotificationContainer.root.isVisible = false
-        markwon.setMarkdown(binding.readmeContent, getString(R.string.no_readme))
-    }
-
-    private fun showReadmeNoConnectionState() {
-        binding.readmeContent.isVisible = false
-        binding.readmeProgressBar.isVisible = false
-        binding.readmeErrorNotificationContainer.root.isVisible = true
-        binding.retryButton.isVisible = true
-        with(binding.readmeErrorNotificationContainer) {
-            errorImage.setImageResource(R.drawable.ic_no_connection)
-            errorMainDescription.text = getString(R.string.connection_error)
-            errorAuxiliaryDescription.text =
+        binding.repositoryErrorNotificationContainer.errorAuxiliaryDescription.text = when (state) {
+            is DetailInfoScreenState.ErrorNoConnection -> {
                 getString(R.string.check_your_internet_connection)
+            }
+
+            is DetailInfoScreenState.ErrorOther -> getString(R.string.try_again_later)
+            else -> getString(R.string.empty_string)
+        }
+
+        binding.linkText.text = if (state is DetailInfoScreenState.Loaded) {
+            state.repoDetails.url
+        } else {
+            getString(R.string.empty_string)
+        }
+
+        binding.licenseInfoContainer.isVisible =
+            state is DetailInfoScreenState.Loaded && state.repoDetails.licenseName.isNotEmpty()
+
+        binding.licenseNameText.text =
+            if (state is DetailInfoScreenState.Loaded
+                && state.repoDetails.licenseName.isNotEmpty()
+            ) {
+                state.repoDetails.licenseName
+            } else {
+                getString(R.string.empty_string)
+            }
+
+        binding.starsCountNumber.text = if (state is DetailInfoScreenState.Loaded) {
+            state.repoDetails.stargazersCount.toString()
+        } else {
+            getString(R.string.empty_string)
+        }
+
+        binding.starsTitle.text = if (state is DetailInfoScreenState.Loaded) {
+            resources.getQuantityString(R.plurals.star_plurals, state.repoDetails.stargazersCount)
+        } else {
+            getString(R.string.empty_string)
+        }
+
+        binding.forksCountNumber.text = if (state is DetailInfoScreenState.Loaded) {
+            state.repoDetails.forksCount.toString()
+        } else {
+            getString(R.string.empty_string)
+        }
+
+        binding.forksTitle.text = if (state is DetailInfoScreenState.Loaded) {
+            resources.getQuantityString(R.plurals.fork_plurals, state.repoDetails.forksCount)
+        } else {
+            getString(R.string.empty_string)
+        }
+
+        binding.watchersCountNumber.text = if (state is DetailInfoScreenState.Loaded) {
+            state.repoDetails.watchersCount.toString()
+        } else {
+            getString(R.string.empty_string)
+        }
+
+        binding.watchersTitle.text = if (state is DetailInfoScreenState.Loaded) {
+            resources.getQuantityString(R.plurals.watcher_plurals, state.repoDetails.watchersCount)
+        } else {
+            getString(R.string.empty_string)
         }
     }
 
-    private fun showReadmeOtherErrorState(readmeState: ReadmeState.ErrorOther) {
-        binding.readmeContent.isVisible = false
-        binding.readmeProgressBar.isVisible = false
-        binding.readmeErrorNotificationContainer.root.isVisible = true
-        binding.retryButton.isVisible = true
-        with(binding.readmeErrorNotificationContainer) {
-            errorImage.setImageResource(R.drawable.ic_something_error)
-            errorMainDescription.text = readmeState.error
-            errorAuxiliaryDescription.text = getString(R.string.try_again_later)
+    private fun renderReadmeState(state: ReadmeState) {
+        binding.readmeContent.isVisible = when (state) {
+            is ReadmeState.Loaded, is ReadmeState.Empty, is ReadmeState.NotExists -> true
+            else -> false
+        }
+
+        binding.readmeProgressBar.isVisible = state is ReadmeState.Loading
+
+        when (state) {
+            is ReadmeState.Loaded -> markwon.setMarkdown(binding.readmeContent, state.markdown)
+            is ReadmeState.Empty -> markwon.setMarkdown(
+                binding.readmeContent,
+                getString(R.string.readme_is_empty)
+            )
+
+            is ReadmeState.NotExists -> markwon.setMarkdown(
+                binding.readmeContent,
+                getString(R.string.no_readme)
+            )
+
+            else -> {}
+        }
+
+        binding.readmeErrorNotificationContainer.root.isVisible =
+            state is ReadmeState.ErrorNoConnection || state is ReadmeState.ErrorOther
+
+        binding.retryButton.isVisible =
+            state is ReadmeState.ErrorNoConnection || state is ReadmeState.ErrorOther
+
+        with(binding.readmeErrorNotificationContainer.errorImage) {
+            when (state) {
+                is ReadmeState.ErrorNoConnection -> setImageResource(R.drawable.ic_no_connection)
+                is ReadmeState.ErrorOther -> setImageResource(R.drawable.ic_something_error)
+                else -> {}
+            }
+        }
+
+        binding.readmeErrorNotificationContainer.errorMainDescription.text = when (state) {
+            is ReadmeState.ErrorNoConnection -> getString(R.string.connection_error)
+            is ReadmeState.ErrorOther -> state.error
+            else -> getString(R.string.empty_string)
+        }
+
+        binding.readmeErrorNotificationContainer.errorAuxiliaryDescription.text = when (state) {
+            is ReadmeState.ErrorNoConnection -> getString(R.string.check_your_internet_connection)
+            is ReadmeState.ErrorOther -> getString(R.string.try_again_later)
+            else -> getString(R.string.empty_string)
         }
     }
 
