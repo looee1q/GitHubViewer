@@ -18,20 +18,17 @@ class MainActivity : AppCompatActivity() {
     private val viewModel by viewModels<MainViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        installSplashScreen()
+        val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
         binding = MainActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val content = binding.root.rootView
-
-        content.viewTreeObserver.addOnPreDrawListener {
+        splashScreen.setKeepOnScreenCondition {
             val userAuthStatus = viewModel.userAuthStatus.value
-            if (userAuthStatus != null) {
-                setGraphStartDestination(userAuthStatus)
-                content.viewTreeObserver.removeOnPreDrawListener { true }
+            if (userAuthStatus == null) {
                 true
             } else {
+                setGraphStartDestination(userAuthStatus)
                 false
             }
         }
