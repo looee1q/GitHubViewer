@@ -1,7 +1,9 @@
 package com.example.githubviewer.di
 
-import com.example.githubviewer.data.GitHubApiService
 import com.example.githubviewer.data.KeyValueStorage
+import com.example.githubviewer.data.apiservice.GitHubApiService
+import com.example.githubviewer.data.apiservice.GitHubCleanApiService
+import com.example.githubviewer.data.apiservice.HttpRoutes.BASE_URL
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module
 import dagger.Provides
@@ -18,15 +20,15 @@ import retrofit2.create
 import javax.inject.Qualifier
 import javax.inject.Singleton
 
+/*
 @Qualifier
 @Retention(AnnotationRetention.RUNTIME)
 annotation class HttpTokenHeaderInterceptor
 
 @Module
 @InstallIn(SingletonComponent::class)
-object ApiModule {
+object ApiRetrofitModule {
 
-    private const val BASE_URL = "https://api.github.com/"
     private const val HEADER_AUTHORIZATION = "Authorization"
 
     @Singleton
@@ -87,4 +89,11 @@ object ApiModule {
     @Singleton
     @Provides
     fun provideApiService(retrofit: Retrofit) = retrofit.create<GitHubApiService>()
+
+    @Singleton
+    @Provides
+    fun provideCleanApiService(
+        retrofit: Retrofit
+    ): GitHubCleanApiService = retrofit.create<GitHubApiService>()
 }
+*/

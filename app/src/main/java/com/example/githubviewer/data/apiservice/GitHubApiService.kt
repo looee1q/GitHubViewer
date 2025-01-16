@@ -1,4 +1,4 @@
-package com.example.githubviewer.data
+package com.example.githubviewer.data.apiservice
 
 import com.example.githubviewer.data.model.RepoDetailsDto
 import com.example.githubviewer.data.model.RepoDto
@@ -8,25 +8,25 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
 
-interface GitHubApiService {
+interface GitHubApiService : GitHubCleanApiService {
 
     @GET("user")
-    suspend fun authenticateUser(): UserInfoDto
+    override suspend fun authenticateUser(): UserInfoDto
 
     @GET("user/repos")
-    suspend fun getListRepositoriesForAuthenticatedUser(
+    override suspend fun getListRepositoriesForAuthenticatedUser(
         @Query("per_page") perPage: Int,
-        @Query("sort") sort: String = "created"
+        @Query("sort") sort: String
     ): List<RepoDto>
 
     @GET("repos/{owner}/{repo}")
-    suspend fun getRepositoryDetails(
+    override suspend fun getRepositoryDetails(
         @Path("owner") repositoryOwner: String,
         @Path("repo") repositoryName: String,
     ): RepoDetailsDto
 
     @GET("repos/{owner}/{repo}/readme")
-    suspend fun getRepositoryReadme(
+    override suspend fun getRepositoryReadme(
         @Path("owner") repositoryOwner: String,
         @Path("repo") repositoryName: String,
     ): RepoReadmeDto

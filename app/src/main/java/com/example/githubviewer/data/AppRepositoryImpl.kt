@@ -1,6 +1,7 @@
 package com.example.githubviewer.data
 
 import android.net.ConnectivityManager
+import com.example.githubviewer.data.apiservice.GitHubCleanApiService
 import com.example.githubviewer.data.model.RepoDetailsDto
 import com.example.githubviewer.data.model.RepoDto
 import com.example.githubviewer.data.model.RepoReadmeDto
@@ -24,7 +25,7 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 
 @Singleton
 class AppRepositoryImpl @Inject constructor(
-    private val apiService: GitHubApiService,
+    private val apiService: GitHubCleanApiService,
     private val keyValueStorage: KeyValueStorage,
     private val connectivityManager: ConnectivityManager,
     private val userInfoMapper: Mapper<UserInfoDto, UserInfo>,
@@ -43,6 +44,7 @@ class AppRepositoryImpl @Inject constructor(
             val userRepositories = apiService
                 .getListRepositoriesForAuthenticatedUser(
                     perPage = REPOSITORIES_PER_PAGE,
+                    sort = SORT_QUERY_VALUE_CREATED
                 )
                 .map { repoMapper.map(it) }
             NetworkRequestResult.Success(userRepositories)
@@ -139,5 +141,6 @@ class AppRepositoryImpl @Inject constructor(
         private const val REPOSITORIES_PER_PAGE = 10
         private const val NETWORK_ERROR_404 = 404
         private const val NO_USER_IS_AUTHORIZED_EXCEPTION = "No user is authorized"
+        private const val SORT_QUERY_VALUE_CREATED = "created"
     }
 }
