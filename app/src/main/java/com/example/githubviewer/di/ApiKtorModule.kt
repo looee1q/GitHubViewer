@@ -31,7 +31,10 @@ object ApiKtorModule {
 
     @Singleton
     @Provides
-    fun provideJson() = Json { ignoreUnknownKeys = true }
+    fun provideJson() = Json {
+        ignoreUnknownKeys = true
+        explicitNulls = false
+    }
 
     @Singleton
     @Provides

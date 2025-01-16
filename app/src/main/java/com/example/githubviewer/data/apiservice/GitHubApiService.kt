@@ -11,7 +11,8 @@ interface GitHubApiService {
 
     suspend fun getListRepositoriesForAuthenticatedUser(
         perPage: Int,
-        sort: String
+        sort: String,
+        type: String
     ): List<RepoDto>
 
     suspend fun getRepositoryDetails(

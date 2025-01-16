@@ -26,12 +26,14 @@ class GitHubApiServiceImpl @Inject constructor(
 
     override suspend fun getListRepositoriesForAuthenticatedUser(
         perPage: Int,
-        sort: String
+        sort: String,
+        type: String
     ): List<RepoDto> {
         return client.get {
             url(HttpRoutes.USER_REPOS)
             parameter(key = HttpQueries.PER_PAGE, value = perPage)
             parameter(key = HttpQueries.SORT, value = sort)
+            parameter(key = HttpQueries.TYPE, value = type)
         }.body<List<RepoDto>>()
     }
 

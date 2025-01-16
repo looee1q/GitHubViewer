@@ -45,7 +45,8 @@ class AppRepositoryImpl @Inject constructor(
             val userRepositories = apiService
                 .getListRepositoriesForAuthenticatedUser(
                     perPage = REPOSITORIES_PER_PAGE,
-                    sort = SORT_QUERY_VALUE_CREATED
+                    sort = SORT_QUERY_VALUE_UPDATED,
+                    type = TYPE_QUERY_VALUE_OWNER
                 )
                 .map { repoMapper.map(it) }
             NetworkRequestResult.Success(userRepositories)
@@ -141,6 +142,7 @@ class AppRepositoryImpl @Inject constructor(
         private const val TOKEN_PREFIX = "Bearer "
         private const val REPOSITORIES_PER_PAGE = 10
         private const val NO_USER_IS_AUTHORIZED_EXCEPTION = "No user is authorized"
-        private const val SORT_QUERY_VALUE_CREATED = "updated"
+        private const val SORT_QUERY_VALUE_UPDATED = "updated"
+        private const val TYPE_QUERY_VALUE_OWNER = "owner"
     }
 }
