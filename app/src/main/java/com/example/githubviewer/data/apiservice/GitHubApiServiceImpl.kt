@@ -14,9 +14,9 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class GitHubCleanApiServiceImpl @Inject constructor(
+class GitHubApiServiceImpl @Inject constructor(
     private val client: HttpClient
-) : GitHubCleanApiService {
+) : GitHubApiService {
 
     override suspend fun authenticateUser(): UserInfoDto {
         return client.get {

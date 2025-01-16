@@ -1,8 +1,8 @@
 package com.example.githubviewer.di
 
 import com.example.githubviewer.data.KeyValueStorage
-import com.example.githubviewer.data.apiservice.GitHubCleanApiService
-import com.example.githubviewer.data.apiservice.GitHubCleanApiServiceImpl
+import com.example.githubviewer.data.apiservice.GitHubApiService
+import com.example.githubviewer.data.apiservice.GitHubApiServiceImpl
 import com.example.githubviewer.data.apiservice.HttpRoutes
 import dagger.Binds
 import dagger.Module
@@ -71,5 +71,5 @@ abstract class ApiServiceModule() {
 
     @Singleton
     @Binds
-    abstract fun bindApiService(impl: GitHubCleanApiServiceImpl): GitHubCleanApiService
+    abstract fun bindApiService(impl: GitHubApiServiceImpl): GitHubApiService
 }

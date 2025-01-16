@@ -1,7 +1,7 @@
 package com.example.githubviewer.data
 
 import android.net.ConnectivityManager
-import com.example.githubviewer.data.apiservice.GitHubCleanApiService
+import com.example.githubviewer.data.apiservice.GitHubApiService
 import com.example.githubviewer.data.model.RepoDetailsDto
 import com.example.githubviewer.data.model.RepoDto
 import com.example.githubviewer.data.model.RepoReadmeDto
@@ -17,7 +17,8 @@ import com.example.githubviewer.domain.model.RepoDetails
 import com.example.githubviewer.domain.model.RepoReadme
 import com.example.githubviewer.domain.model.UserAuthStatus
 import com.example.githubviewer.domain.model.UserInfo
-import retrofit2.HttpException
+import io.ktor.client.plugins.ClientRequestException
+import io.ktor.http.HttpStatusCode
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.io.encoding.Base64
@@ -25,7 +26,7 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 
 @Singleton
 class AppRepositoryImpl @Inject constructor(
-    private val apiService: GitHubCleanApiService,
+    private val apiService: GitHubApiService,
     private val keyValueStorage: KeyValueStorage,
     private val connectivityManager: ConnectivityManager,
     private val userInfoMapper: Mapper<UserInfoDto, UserInfo>,
@@ -90,8 +91,8 @@ class AppRepositoryImpl @Inject constructor(
                     repoReadmeMapper.map(encoded)
                 }
             NetworkRequestResult.Success(repositoryReadme)
-        } catch (httpException: HttpException) {
-            if (httpException.code() == NETWORK_ERROR_404) {
+        } catch (httpException: ClientRequestException) {
+            if (httpException.response.status == HttpStatusCode.NotFound) {
                 NetworkRequestResult.Error(ExtendedNetworkError.ResourceNotFoundError)
             } else {
                 NetworkRequestResult.Error(
@@ -139,8 +140,7 @@ class AppRepositoryImpl @Inject constructor(
     companion object {
         private const val TOKEN_PREFIX = "Bearer "
         private const val REPOSITORIES_PER_PAGE = 10
-        private const val NETWORK_ERROR_404 = 404
         private const val NO_USER_IS_AUTHORIZED_EXCEPTION = "No user is authorized"
-        private const val SORT_QUERY_VALUE_CREATED = "created"
+        private const val SORT_QUERY_VALUE_CREATED = "updated"
     }
 }
