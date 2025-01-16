@@ -50,6 +50,8 @@ object ApiKtorModule {
 
         return HttpClient(engine) {
 
+            expectSuccess = true
+
             install(Logging) {
                 logger = Logger.ANDROID
                 level = LogLevel.ALL
